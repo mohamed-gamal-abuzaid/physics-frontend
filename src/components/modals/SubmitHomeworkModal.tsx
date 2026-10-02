@@ -65,7 +65,7 @@ export function SubmitHomeworkModal() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!fileName && !fileUrl) {
-      showToast('Please select a file or enter file details', 'error');
+      showToast('Please upload your completed homework worksheet or solution file (PDF or image).', 'error');
       return;
     }
     submitMutation.mutate({

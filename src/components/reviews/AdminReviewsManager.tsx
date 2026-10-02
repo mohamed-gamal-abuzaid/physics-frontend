@@ -167,12 +167,16 @@ export function AdminReviewsManager() {
                         Cancel
                       </button>
                       <button
-                        onClick={() =>
+                        onClick={() => {
+                          if (!editedContent.trim()) {
+                            showToast('Review content cannot be empty. Please enter the testimonial text.', 'error');
+                            return;
+                          }
                           moderateMutation.mutate({
                             id: rev.id,
-                            data: { content: editedContent },
-                          })
-                        }
+                            data: { content: editedContent.trim() },
+                          });
+                        }}
                         className="px-4 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-1"
                       >
                         <Save className="w-3.5 h-3.5" /> Save Changes

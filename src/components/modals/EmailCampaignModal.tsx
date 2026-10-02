@@ -54,6 +54,18 @@ export function EmailCampaignModal() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!title.trim()) {
+      showToast('Please enter an internal title for this broadcast campaign.', 'error');
+      return;
+    }
+    if (!subject.trim()) {
+      showToast('Please enter an email subject line that recipients will see.', 'error');
+      return;
+    }
+    if (!body.trim() || body.trim().length < 5) {
+      showToast('Please write the message content for your email broadcast (at least 5 characters).', 'error');
+      return;
+    }
     campaignMutation.mutate();
   };
 

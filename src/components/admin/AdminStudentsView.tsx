@@ -302,11 +302,11 @@ export function AdminStudentsView() {
     e.preventDefault();
     if (!selectedStudentId) return;
     if (!editYear) {
-      setEditError('Please select a Year.');
+      setEditError('Please select the academic year for this scholar (e.g., Y10, Y11, Y12).');
       return;
     }
     if (!editBoard) {
-      setEditError('Please select a Board.');
+      setEditError('Please select the exam board curriculum (e.g., Cambridge, Edexcel, Oxford AQA).');
       return;
     }
     setEditError(null);

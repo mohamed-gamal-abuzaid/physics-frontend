@@ -106,31 +106,31 @@ export function StudentDashboard() {
     setProfileFormError(null);
 
     if (!editName.trim()) {
-      setProfileFormError('Full Name is required.');
+      setProfileFormError('Please enter your full name (at least 2 characters).');
       return;
     }
     if (!editEmail.trim() || !editEmail.includes('@')) {
-      setProfileFormError('A valid email address is required.');
+      setProfileFormError('Please enter a valid email address (e.g. scholar@example.com).');
       return;
     }
     if (!editSchoolName.trim()) {
-      setProfileFormError('School Name is required.');
+      setProfileFormError('Please enter your school or educational institution name.');
       return;
     }
     if (!editYear) {
-      setProfileFormError('Please select an Academic Year.');
+      setProfileFormError('Please select your academic year (e.g. Year 10, Year 11, Year 12).');
       return;
     }
     if (!editBoard) {
-      setProfileFormError('Please select a Board curriculum.');
+      setProfileFormError('Please select your exam board curriculum (e.g. Cambridge, Edexcel, Oxford).');
       return;
     }
     if (!editStudentPhone.trim()) {
-      setProfileFormError('Student Phone Number is required.');
+      setProfileFormError('Please enter your student phone number (e.g. 01012345678).');
       return;
     }
     if (!editParentPhone.trim()) {
-      setProfileFormError('Parent Phone Number is required.');
+      setProfileFormError('Please enter a parent or guardian phone number.');
       return;
     }
 

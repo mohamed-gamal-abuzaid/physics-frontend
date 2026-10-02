@@ -41,10 +41,22 @@ export function AddAccountModal({ isOpen, onClose }: AddAccountModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) {
+      showToast('Please enter the scholar\'s full name (at least 2 characters).', 'error');
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      showToast('Please enter a valid email address (e.g. student@example.com).', 'error');
+      return;
+    }
+    if (!phone.trim()) {
+      showToast('Please enter a contact phone or WhatsApp number.', 'error');
+      return;
+    }
     addMutation.mutate({
-      name,
-      email,
-      phone,
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
       gradeLevel,
       cohort,
       enrolledCourse,

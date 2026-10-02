@@ -50,7 +50,15 @@ export function ManualCreditModal() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentStudentId) {
-      showToast('Please select a student', 'error');
+      showToast('Please select a student account to adjust credits for.', 'error');
+      return;
+    }
+    if (!amount || isNaN(amount) || amount <= 0) {
+      showToast('Please enter a valid number of session credits (at least 1 credit).', 'error');
+      return;
+    }
+    if (!reason.trim()) {
+      showToast('Please specify a brief reason or reference for this credit adjustment.', 'error');
       return;
     }
     const finalAmount = actionType === 'add' ? Math.abs(amount) : -Math.abs(amount);
@@ -59,7 +67,7 @@ export function ManualCreditModal() {
       data: {
         creditType,
         amount: finalAmount,
-        reason: reason || 'Manual administrative credit adjustment',
+        reason: reason.trim(),
       },
     });
   };

@@ -64,31 +64,31 @@ export function AccountSettingsModal() {
     setFormError(null);
 
     if (!name.trim()) {
-      setFormError('Name is required.');
+      setFormError('Please enter your full name (at least 2 characters).');
       return;
     }
     if (!email.trim() || !email.includes('@')) {
-      setFormError('A valid email address is required.');
+      setFormError('Please enter a valid email address (e.g. scholar@example.com).');
       return;
     }
     if (!schoolName.trim()) {
-      setFormError('School Name is required.');
+      setFormError('Please enter your school or educational institution name.');
       return;
     }
     if (!year) {
-      setFormError('Please select a Year.');
+      setFormError('Please select your academic year (e.g. Year 10, Year 11, Year 12).');
       return;
     }
     if (!board) {
-      setFormError('Please select a Board curriculum.');
+      setFormError('Please select your exam board curriculum (e.g. Cambridge, Edexcel, Oxford).');
       return;
     }
     if (!phone.trim()) {
-      setFormError('Student Phone Number is required.');
+      setFormError('Please enter your student phone number (e.g. 01012345678).');
       return;
     }
     if (!parentPhone.trim()) {
-      setFormError('Parent Phone Number is required.');
+      setFormError('Please enter a parent or guardian phone number.');
       return;
     }
 

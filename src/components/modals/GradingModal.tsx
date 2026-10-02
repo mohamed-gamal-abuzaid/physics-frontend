@@ -47,12 +47,18 @@ export function GradingModal() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const numScore = Number(score);
+    const maxScore = 100;
+    if (isNaN(numScore) || numScore < 0 || numScore > maxScore) {
+      showToast(`Please enter a valid score between 0 and ${maxScore}.`, 'error');
+      return;
+    }
     gradeMutation.mutate({
       id: activeSubmissionForGrade.id,
       data: {
-        score: Number(score),
+        score: numScore,
         letterGrade,
-        feedbackNotes,
+        feedbackNotes: feedbackNotes.trim(),
       },
     });
   };

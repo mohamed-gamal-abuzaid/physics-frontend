@@ -193,17 +193,21 @@ export function AdminDashboard() {
 
   const handleVideoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateVideoMutation.mutate(videoUrlInput);
+    if (!videoUrlInput.trim()) {
+      showToast('Please paste a valid YouTube video URL to update the intro video.', 'error');
+      return;
+    }
+    updateVideoMutation.mutate(videoUrlInput.trim());
   };
 
   const handleGroupBroadcastSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedGroup) {
-      showToast('Please select a group.', 'error');
+      showToast('Please select a scholar group to broadcast the meeting link to.', 'error');
       return;
     }
     if (!groupMeetingLink.trim()) {
-      showToast('Please enter a valid meeting URL.', 'error');
+      showToast('Please enter a valid meeting room URL (Google Meet, Zoom, or Teams link).', 'error');
       return;
     }
     broadcastGroupMutation.mutate();

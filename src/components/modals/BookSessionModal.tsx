@@ -67,8 +67,16 @@ export function BookSessionModal() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isAuthenticated) {
+      if (!date) {
+        showToast('Please select a date for your session.', 'error');
+        return;
+      }
+      if (!time) {
+        showToast('Please select a preferred time slot.', 'error');
+        return;
+      }
       studentBookingMutation.mutate({
-        topic: topic || 'General Physics Revision',
+        topic: topic.trim() || 'General Physics Revision',
         courseName,
         date,
         time,
@@ -78,14 +86,22 @@ export function BookSessionModal() {
         durationMinutes: 60,
       });
     } else {
-      if (!name || !email || !phone) {
-        showToast('Please fill in your contact information', 'error');
+      if (!name.trim()) {
+        showToast('Please enter your full name.', 'error');
+        return;
+      }
+      if (!email.trim() || !email.includes('@')) {
+        showToast('Please enter a valid email address (e.g. name@example.com).', 'error');
+        return;
+      }
+      if (!phone.trim()) {
+        showToast('Please enter your contact phone number.', 'error');
         return;
       }
       publicInquiryMutation.mutate({
-        name,
-        email,
-        phone,
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
         sessionFormat,
         courseName,
       });

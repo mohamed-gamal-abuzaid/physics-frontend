@@ -108,6 +108,14 @@ export function TopUpModal() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!sessionsCount || sessionsCount <= 0) {
+      showToast('Please select at least 1 session to top up.', 'error');
+      return;
+    }
+    if (!senderAccountOrPhone.trim()) {
+      showToast('Please enter the sender phone number or account used for the transfer.', 'error');
+      return;
+    }
     if (!screenshotUrl) {
       showToast('Please upload or attach a screenshot of your transfer receipt.', 'error');
       return;
@@ -118,10 +126,10 @@ export function TopUpModal() {
       creditType: sessionFormat,
       amount: totalAmount,
       paymentMethod: selectedMethod,
-      senderAccountOrPhone,
-      transactionRef: transactionRef || undefined,
+      senderAccountOrPhone: senderAccountOrPhone.trim(),
+      transactionRef: transactionRef.trim() || undefined,
       screenshotUrl,
-      notes: notes || undefined,
+      notes: notes.trim() || undefined,
     });
   };
 

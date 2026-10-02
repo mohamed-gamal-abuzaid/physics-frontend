@@ -48,11 +48,19 @@ export function NewTicketModal() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!subject.trim()) {
+      showToast('Please enter a brief subject for your support ticket.', 'error');
+      return;
+    }
+    if (!message.trim() || message.trim().length < 5) {
+      showToast('Please describe your inquiry or issue in detail (at least 5 characters).', 'error');
+      return;
+    }
     ticketMutation.mutate({
-      subject,
+      subject: subject.trim(),
       category,
       priority,
-      message,
+      message: message.trim(),
     });
   };
 

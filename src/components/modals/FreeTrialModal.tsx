@@ -12,9 +12,13 @@ import { X, Sparkles, CheckCircle } from 'lucide-react';
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 const schema = z.object({
-  name: z.string().min(2, 'Full name is required'),
-  email: z.string().min(1, 'Email is required').email('Enter a valid email'),
-  phone: z.string().min(6, 'Phone number is required'),
+  name: z.string().trim().min(2, 'Please enter your full name (at least 2 characters)'),
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Please enter your email address')
+    .email('Please enter a valid email address (e.g., student@example.com)'),
+  phone: z.string().trim().min(6, 'Please enter a valid phone number (at least 6 digits)'),
   parentName: z.string().optional(),
   parentPhone: z.string().optional(),
   gradeLevel: z.string().optional(),
@@ -135,7 +139,11 @@ export function FreeTrialModal() {
                   type="text"
                   placeholder="Ahmed Ali"
                   {...register('name')}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none placeholder:text-slate-300"
+                  className={`w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:outline-none placeholder:text-slate-300 transition-shadow ${
+                    errors.name
+                      ? 'border-red-400 focus:ring-red-400 bg-red-50/20'
+                      : 'border-slate-200 focus:ring-indigo-500'
+                  }`}
                 />
                 {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>}
               </div>
@@ -150,7 +158,11 @@ export function FreeTrialModal() {
                   type="email"
                   placeholder="ahmed@example.com"
                   {...register('email')}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none placeholder:text-slate-300"
+                  className={`w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:outline-none placeholder:text-slate-300 transition-shadow ${
+                    errors.email
+                      ? 'border-red-400 focus:ring-red-400 bg-red-50/20'
+                      : 'border-slate-200 focus:ring-indigo-500'
+                  }`}
                 />
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>}
               </div>
@@ -165,7 +177,11 @@ export function FreeTrialModal() {
                   type="tel"
                   placeholder="+20 100 000 0000"
                   {...register('phone')}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none placeholder:text-slate-300"
+                  className={`w-full px-3.5 py-2.5 border rounded-xl text-sm focus:ring-2 focus:outline-none placeholder:text-slate-300 transition-shadow ${
+                    errors.phone
+                      ? 'border-red-400 focus:ring-red-400 bg-red-50/20'
+                      : 'border-slate-200 focus:ring-indigo-500'
+                  }`}
                 />
                 {errors.phone && <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>}
               </div>

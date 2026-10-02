@@ -47,10 +47,18 @@ export function AssignAccountModal({ student, onClose }: AssignAccountModalProps
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!cohort.trim()) {
+      showToast('Please enter a cohort batch name (e.g. 2025-Quantum).', 'error');
+      return;
+    }
+    if (!enrolledCourse.trim()) {
+      showToast('Please specify the enrolled course (e.g. Cambridge A-Level Physics).', 'error');
+      return;
+    }
     assignMutation.mutate({
-      cohort,
-      enrolledCourse,
-      meetingLink,
+      cohort: cohort.trim(),
+      enrolledCourse: enrolledCourse.trim(),
+      meetingLink: meetingLink.trim(),
     });
   };
 

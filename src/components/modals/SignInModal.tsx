@@ -15,25 +15,45 @@ import { YEAR_OPTIONS, BOARD_OPTIONS } from '@/lib/types';
 // ─── Validation Schemas ──────────────────────────────────────────────────────
 
 const signInSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Enter a valid email'),
-  password: z.string().min(1, 'Password is required'),
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Please enter your email address')
+    .email('Please enter a valid email address (e.g., scholar@example.com)'),
+  password: z.string().min(1, 'Please enter your password to sign in'),
 });
 type SignInValues = z.infer<typeof signInSchema>;
 
 const registerSchema = z
   .object({
-    name: z.string().trim().min(2, 'Name must be at least 2 characters'),
-    email: z.string().trim().min(1, 'Email is required').email('Enter a valid email'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    schoolName: z.string().trim().min(1, 'School name is required'),
-    year: z.string().min(1, 'Please select your academic year'),
-    board: z.string().min(1, 'Please select your board curriculum'),
-    studentPhoneNumber: z.string().trim().min(1, 'Student phone number is required'),
-    parentPhoneNumber: z.string().trim().min(1, 'Parent phone number is required'),
+    name: z
+      .string()
+      .trim()
+      .min(2, 'Please enter your full name (at least 2 characters)'),
+    email: z
+      .string()
+      .trim()
+      .min(1, 'Please enter your email address')
+      .email('Please enter a valid email address (e.g., scholar@example.com)'),
+    password: z.string().min(6, 'Password must be at least 6 characters long'),
+    confirmPassword: z.string().min(1, 'Please re-enter your password to confirm'),
+    schoolName: z
+      .string()
+      .trim()
+      .min(1, 'Please enter your school or educational institution name'),
+    year: z.string().min(1, 'Please select your academic year (e.g., Y10, Y11, Y12)'),
+    board: z.string().min(1, 'Please select your exam board curriculum'),
+    studentPhoneNumber: z
+      .string()
+      .trim()
+      .min(1, 'Please enter your student phone number (e.g., 01012345678)'),
+    parentPhoneNumber: z
+      .string()
+      .trim()
+      .min(1, 'Please enter a parent or guardian phone number'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
+    message: 'Passwords do not match. Please ensure both passwords match.',
     path: ['confirmPassword'],
   });
 type RegisterValues = z.infer<typeof registerSchema>;
@@ -227,7 +247,11 @@ export function SignInModal() {
                 autoComplete="email"
                 placeholder="you@example.com"
                 {...registerSignIn('email')}
-                className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300"
+                className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow ${
+                  signInErrors.email
+                    ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                    : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                }`}
               />
               {signInErrors.email && (
                 <p className="mt-1 text-xs text-rose-500">{signInErrors.email.message}</p>
@@ -245,7 +269,11 @@ export function SignInModal() {
                   autoComplete="current-password"
                   placeholder="••••••••"
                   {...registerSignIn('password')}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300 pr-10"
+                  className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow pr-10 ${
+                    signInErrors.password
+                      ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                      : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                  }`}
                 />
                 <button
                   type="button"
@@ -310,7 +338,11 @@ export function SignInModal() {
                   autoComplete="name"
                   placeholder="e.g. Omar Tarek"
                   {...registerSignUp('name')}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300"
+                  className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow ${
+                    signUpErrors.name
+                      ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                      : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                  }`}
                 />
                 {signUpErrors.name && (
                   <p className="mt-1 text-xs text-rose-500">{signUpErrors.name.message}</p>
@@ -327,7 +359,11 @@ export function SignInModal() {
                   autoComplete="email"
                   placeholder="omar@example.com"
                   {...registerSignUp('email')}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300"
+                  className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow ${
+                    signUpErrors.email
+                      ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                      : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                  }`}
                 />
                 {signUpErrors.email && (
                   <p className="mt-1 text-xs text-rose-500">{signUpErrors.email.message}</p>
@@ -344,7 +380,11 @@ export function SignInModal() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Min 6 chars"
                     {...registerSignUp('password')}
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300"
+                    className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow ${
+                      signUpErrors.password
+                        ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                        : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                    }`}
                   />
                   {signUpErrors.password && (
                     <p className="mt-1 text-xs text-rose-500">{signUpErrors.password.message}</p>
@@ -360,7 +400,11 @@ export function SignInModal() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="Repeat password"
                     {...registerSignUp('confirmPassword')}
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300"
+                    className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow ${
+                      signUpErrors.confirmPassword
+                        ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                        : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                    }`}
                   />
                   {signUpErrors.confirmPassword && (
                     <p className="mt-1 text-xs text-rose-500">{signUpErrors.confirmPassword.message}</p>
@@ -385,7 +429,11 @@ export function SignInModal() {
                   type="text"
                   placeholder="e.g. Modern English School"
                   {...registerSignUp('schoolName')}
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300"
+                  className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow ${
+                    signUpErrors.schoolName
+                      ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                      : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                  }`}
                 />
                 {signUpErrors.schoolName && (
                   <p className="mt-1 text-xs text-rose-500">{signUpErrors.schoolName.message}</p>
@@ -400,7 +448,11 @@ export function SignInModal() {
                   <select
                     id="su-year"
                     {...registerSignUp('year')}
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow bg-white text-slate-800"
+                    className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow bg-white text-slate-800 ${
+                      signUpErrors.year
+                        ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                        : 'border-slate-200 focus:ring-indigo-500'
+                    }`}
                   >
                     <option value="">Select Year...</option>
                     {YEAR_OPTIONS.map((opt) => (
@@ -421,7 +473,11 @@ export function SignInModal() {
                   <select
                     id="su-board"
                     {...registerSignUp('board')}
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow bg-white text-slate-800"
+                    className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow bg-white text-slate-800 ${
+                      signUpErrors.board
+                        ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                        : 'border-slate-200 focus:ring-indigo-500'
+                    }`}
                   >
                     <option value="">Select Board...</option>
                     {BOARD_OPTIONS.map((opt) => (
@@ -455,7 +511,11 @@ export function SignInModal() {
                     autoComplete="tel"
                     placeholder="01012345678"
                     {...registerSignUp('studentPhoneNumber')}
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300"
+                    className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow ${
+                      signUpErrors.studentPhoneNumber
+                        ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                        : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                    }`}
                   />
                   {signUpErrors.studentPhoneNumber && (
                     <p className="mt-1 text-xs text-rose-500">{signUpErrors.studentPhoneNumber.message}</p>
@@ -471,7 +531,11 @@ export function SignInModal() {
                     type="tel"
                     placeholder="01098765432"
                     {...registerSignUp('parentPhoneNumber')}
-                    className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-shadow placeholder:text-slate-300"
+                    className={`w-full px-3.5 py-2.5 border rounded-xl text-xs focus:ring-2 focus:outline-none transition-shadow ${
+                      signUpErrors.parentPhoneNumber
+                        ? 'border-rose-400 focus:ring-rose-400 bg-rose-50/20'
+                        : 'border-slate-200 focus:ring-indigo-500 placeholder:text-slate-300'
+                    }`}
                   />
                   {signUpErrors.parentPhoneNumber && (
                     <p className="mt-1 text-xs text-rose-500">{signUpErrors.parentPhoneNumber.message}</p>

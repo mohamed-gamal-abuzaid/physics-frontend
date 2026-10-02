@@ -53,17 +53,25 @@ export function CompleteSessionModal() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!title.trim()) {
+      showToast('Please provide a lesson title for the completed session.', 'error');
+      return;
+    }
+    if (!summaryNotes.trim()) {
+      showToast('Please enter summary notes to document this session for the scholar.', 'error');
+      return;
+    }
     completeMutation.mutate({
       id: activeSessionForCompletion.id,
       data: {
         sessionNotes: {
-          title,
-          summaryNotes,
-          keyConcepts: keyConcepts ? keyConcepts.split(',').map((k) => k.trim()) : [],
+          title: title.trim(),
+          summaryNotes: summaryNotes.trim(),
+          keyConcepts: keyConcepts ? keyConcepts.split(',').map((k) => k.trim()).filter(Boolean) : [],
           uploadedAt: new Date().toISOString(),
         },
         assignedHomeworkId: assignedHomeworkId || undefined,
-        notes,
+        notes: notes.trim(),
       },
     });
   };
