@@ -375,6 +375,24 @@ export interface AppNotification {
 
 // ─── App Config / Settings ────────────────────────────────────────────────────
 
+export interface EducationalStage {
+  id: string;
+  name: string;
+  code: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface SubjectCourse {
+  id: string;
+  name: string;
+  board: string;
+  stage: string;
+  code?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
 export interface SessionPricingConfig {
   oneToOneRate: number;
   groupRate7Plus: number;
@@ -385,10 +403,21 @@ export interface SessionPricingConfig {
 }
 
 export interface AppConfig {
-  curriculaOptions: string[];
+  curriculaOptions: Array<SubjectCourse | string>;
+  stagesOptions?: EducationalStage[];
   examSessionOptions: string[];
   introVideoUrl: string;
   sessionPricing: SessionPricingConfig;
+}
+
+export interface AdminSettings {
+  id?: number;
+  introVideoUrl?: string | null;
+  curriculaOptions?: Array<SubjectCourse | string>;
+  stagesOptions?: EducationalStage[];
+  examSessionOptions?: string[];
+  sessionPricing?: any;
+  updatedAt?: string;
 }
 
 export interface PaymentChannel {

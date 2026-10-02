@@ -225,9 +225,16 @@ export function FreeTrialModal() {
                   className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-700"
                 >
                   <option value="">Select curriculum…</option>
-                  {config?.curriculaOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
+                  {config?.curriculaOptions.map((opt) => {
+                    const label = typeof opt === 'string' ? opt : opt.name;
+                    const val = typeof opt === 'string' ? opt : opt.name;
+                    const key = typeof opt === 'string' ? opt : opt.id || opt.name;
+                    return (
+                      <option key={key} value={val}>
+                        {label}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 

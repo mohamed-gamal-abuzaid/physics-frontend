@@ -11,6 +11,7 @@ import {
   AlertCircle, Clock, MessageSquare, ShieldCheck, Sparkles,
   Video, Play, ExternalLink, Send, Save, Radio, Link2,
 } from 'lucide-react';
+import { AcademicCatalogManager } from '@/components/admin/AcademicCatalogManager';
 
 function StatCard({
   label,
@@ -505,6 +506,9 @@ export function AdminDashboard() {
           </form>
         </div>
       </div>
+
+      {/* Academic Stages & Subjects Catalog Management */}
+      <AcademicCatalogManager />
 
       {/* Ungraded Submissions */}
       {ungradedSubmissions.length > 0 && (
