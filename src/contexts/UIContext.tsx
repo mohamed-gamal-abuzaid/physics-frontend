@@ -135,6 +135,14 @@ interface UIContextType {
   // Account Settings Modal
   isAccountSettingsOpen: boolean;
   setIsAccountSettingsOpen: (open: boolean) => void;
+
+  // Broadcast Notification Modal
+  isBroadcastNotifOpen: boolean;
+  setIsBroadcastNotifOpen: (open: boolean) => void;
+
+  // Admin Create Session Modal
+  isAdminCreateSessionOpen: boolean;
+  setIsAdminCreateSessionOpen: (open: boolean) => void;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -181,6 +189,8 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [isNewTicketOpen, setIsNewTicketOpen] = useState(false);
   const [isEmailCampaignOpen, setIsEmailCampaignOpen] = useState(false);
   const [isAccountSettingsOpen, setIsAccountSettingsOpen] = useState(false);
+  const [isBroadcastNotifOpen, setIsBroadcastNotifOpen] = useState(false);
+  const [isAdminCreateSessionOpen, setIsAdminCreateSessionOpen] = useState(false);
 
   return (
     <UIContext.Provider
@@ -243,6 +253,10 @@ export function UIProvider({ children }: { children: ReactNode }) {
         setIsEmailCampaignOpen,
         isAccountSettingsOpen,
         setIsAccountSettingsOpen,
+        isBroadcastNotifOpen,
+        setIsBroadcastNotifOpen,
+        isAdminCreateSessionOpen,
+        setIsAdminCreateSessionOpen,
       }}
     >
       {children}

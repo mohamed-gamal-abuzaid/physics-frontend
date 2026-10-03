@@ -15,6 +15,8 @@ import type {
   Review,
   EmailCampaign,
   OutboxEmail,
+  BroadcastNotificationData,
+  AdminCreateSessionData,
 } from '../types';
 
 export const adminApi = {
@@ -142,7 +144,7 @@ export const adminApi = {
     const res = await apiClient.get<any>('/api/admin/settings');
     return res.data?.settings ?? res.data;
   },
-  updateSettings: async (data: Partial<AppConfig>): Promise<AppConfig> => {
+  updateSettings: async (data: any): Promise<AppConfig> => {
     const res = await apiClient.patch<any>('/api/admin/settings', data);
     return res.data?.settings ?? res.data;
   },
@@ -332,5 +334,17 @@ export const adminApi = {
   getOutbox: async (): Promise<OutboxEmail[]> => {
     const res = await apiClient.get<any>('/api/admin/outbox');
     return unwrapList<OutboxEmail>(res.data?.outbox ?? res.data);
+  },
+
+  // Admin Session Creation
+  createSession: async (data: AdminCreateSessionData): Promise<BookingSession> => {
+    const res = await apiClient.post<any>('/api/admin/sessions', data);
+    return res.data?.session ?? res.data;
+  },
+
+  // Broadcast Notifications
+  broadcastNotification: async (data: BroadcastNotificationData): Promise<{ success: boolean; count: number; message: string }> => {
+    const res = await apiClient.post<any>('/api/admin/notifications/broadcast', data);
+    return res.data;
   },
 };

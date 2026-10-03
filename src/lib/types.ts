@@ -400,6 +400,76 @@ export interface SessionPricingConfig {
   currency?: string;
   updatedAt?: string;
   updatedBy?: string;
+  plans?: LandingPlan[];
+}
+
+export interface LandingPlan {
+  id: string;
+  title: string;
+  price: number;
+  format: 'PRIVATE' | 'GROUP';
+  sessionsCount: number;
+  currency: string;
+  groupNumber?: number;
+  maxStudents?: number;
+  description: string;
+  features: string[];
+  highlight?: boolean;
+  badge?: string;
+}
+
+export interface AvailableGroupSession {
+  id: number;
+  courseName: string;
+  topic: string;
+  date: string;
+  time: string;
+  durationMinutes: number;
+  location: string;
+  maxStudents: number;
+  enrolledCount: number;
+  spotsLeft: number;
+  meetingLink?: string;
+  notes?: string;
+}
+
+export interface BookedTimeSlot {
+  date: string;
+  time: string;
+  sessionFormat: 'PRIVATE' | 'GROUP';
+}
+
+export interface AvailableSlotsResponse {
+  availableGroups: AvailableGroupSession[];
+  allGroups: AvailableGroupSession[];
+  bookedSlots: BookedTimeSlot[];
+}
+
+export interface BroadcastNotificationData {
+  targetType: 'ALL' | 'STUDENT' | 'COHORT' | 'COURSE';
+  studentId?: number;
+  cohort?: string;
+  course?: string;
+  title: string;
+  message: string;
+  type: 'ASSIGNMENT' | 'TASK' | 'SESSION' | 'UPDATE' | 'ANNOUNCEMENT' | 'GENERAL';
+  linkTab?: string;
+  sendEmail?: boolean;
+}
+
+export interface AdminCreateSessionData {
+  courseName: string;
+  topic: string;
+  sessionFormat: 'PRIVATE' | 'GROUP';
+  date: string;
+  time: string;
+  durationMinutes?: number;
+  location?: string;
+  status?: string;
+  studentId?: number;
+  maxStudents?: number;
+  meetingLink?: string;
+  notes?: string;
 }
 
 export interface AppConfig {

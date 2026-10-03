@@ -12,6 +12,7 @@ import type {
   Review,
   SupportTicket,
   TicketMessage,
+  AvailableSlotsResponse,
 } from '../types';
 
 export const studentApi = {
@@ -63,14 +64,15 @@ export const studentApi = {
     return unwrapList<BookingSession>(res.data?.sessions ?? res.data);
   },
   createSession: async (data: {
-    topic: string;
-    courseName: string;
-    date: string;
-    time: string;
+    topic?: string;
+    courseName?: string;
+    date?: string;
+    time?: string;
     sessionFormat?: 'PRIVATE' | 'GROUP';
     location?: string;
     notes?: string;
     durationMinutes?: number;
+    existingSessionId?: number;
   }): Promise<BookingSession> => {
     const res = await apiClient.post<any>('/api/student/sessions', data);
     return res.data?.session ?? res.data;
@@ -170,5 +172,11 @@ export const studentApi = {
   addTicketMessage: async (id: number, text: string): Promise<TicketMessage> => {
     const res = await apiClient.post<any>(`/api/student/tickets/${id}/messages`, { text });
     return res.data?.message ?? res.data;
+  },
+
+  // Available slots for booking
+  getAvailableSlots: async (): Promise<AvailableSlotsResponse> => {
+    const res = await apiClient.get<any>('/api/student/sessions/available-slots');
+    return res.data ?? res.data;
   },
 };
