@@ -16,6 +16,7 @@ export function ScheduleView() {
   const { currentRole } = useAuth();
   const {
     setIsBookSessionOpen,
+    setIsAdminCreateSessionOpen,
     setIsCompleteSessionOpen,
     setActiveSessionForCompletion,
     setIsSessionNotesOpen,
@@ -85,12 +86,24 @@ export function ScheduleView() {
           </p>
         </div>
 
-        <button
-          onClick={() => setIsBookSessionOpen(true)}
-          className="px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition-all flex items-center gap-1.5"
-        >
-          <Plus className="w-4 h-4" /> Book New Session
-        </button>
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <button
+              onClick={() => setIsAdminCreateSessionOpen(true)}
+              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition-all flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" /> Create Session Slot
+            </button>
+          )}
+          {!isAdmin && (
+            <button
+              onClick={() => setIsBookSessionOpen(true)}
+              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition-all flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" /> Book New Session
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filter Tabs */}

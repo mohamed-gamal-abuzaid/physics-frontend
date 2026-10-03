@@ -42,7 +42,7 @@ function StatCard({
 }
 
 export function AdminDashboard() {
-  const { showToast, setIsManualCreditOpen, setIsEmailCampaignOpen, setIsPaymentProofOpen, setActivePaymentProof } = useUI();
+  const { showToast, setIsManualCreditOpen, setIsEmailCampaignOpen, setIsPaymentProofOpen, setActivePaymentProof, setIsBroadcastNotifOpen } = useUI();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -505,6 +505,26 @@ export function AdminDashboard() {
             </div>
           </form>
         </div>
+      </div>
+
+      {/* Broadcast Notification Quick Action */}
+      <div className="bg-gradient-to-r from-indigo-900 to-indigo-700 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-600/50 border border-indigo-500/50 flex items-center justify-center">
+            <Radio className="w-5 h-5 text-indigo-200" />
+          </div>
+          <div>
+            <h3 className="font-bold text-white text-sm">Broadcast Notification</h3>
+            <p className="text-xs text-indigo-300 mt-0.5">Send assignments, session alerts, or announcements to all students or specific groups</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setIsBroadcastNotifOpen(true)}
+          className="px-4 py-2.5 rounded-xl bg-white text-indigo-700 font-bold text-xs hover:bg-indigo-50 transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+        >
+          <Send className="w-3.5 h-3.5" />
+          Send Notification
+        </button>
       </div>
 
       {/* Academic Stages & Subjects Catalog Management */}

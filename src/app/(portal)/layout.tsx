@@ -24,6 +24,8 @@ import { CompleteSessionModal } from '@/components/modals/CompleteSessionModal';
 import { SessionNotesModal } from '@/components/modals/SessionNotesModal';
 import { AccountSettingsModal } from '@/components/modals/AccountSettingsModal';
 import { CertificateModal } from '@/components/modals/CertificateModal';
+import { BroadcastNotificationModal } from '@/components/modals/BroadcastNotificationModal';
+import { AdminCreateSessionModal } from '@/components/modals/AdminCreateSessionModal';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -76,6 +78,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       <SessionNotesModal />
       <AccountSettingsModal />
       <CertificateModal />
+      <BroadcastNotificationModal />
+      <AdminCreateSessionModal />
 
       {/* Global Toast */}
       <Toast />

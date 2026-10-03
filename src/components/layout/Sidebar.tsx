@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Users, CalendarDays, GraduationCap, CreditCard,
-  Headphones, Video, MessageSquare, Atom, LogOut, X, ChevronRight
+  Headphones, Video, MessageSquare, Atom, LogOut, X, ChevronRight, Settings
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -73,6 +73,13 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
       label: 'Reviews Manager',
       icon: MessageSquare,
       href: '/reviews',
+      roles: ['admin'],
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: Settings,
+      href: '/settings',
       roles: ['admin'],
     },
   ].filter((item) => item.roles.includes(currentRole));
