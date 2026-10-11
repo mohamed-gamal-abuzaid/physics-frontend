@@ -116,6 +116,9 @@ export function AdminStudentsView() {
   const [sessionActionError, setSessionActionError] = useState<string | null>(null);
   const [sessionToRemove, setSessionToRemove] = useState<{ id: number; topic: string } | null>(null);
 
+  // Student Delete state
+  const [studentToDelete, setStudentToDelete] = useState<{ id: number; name: string } | null>(null);
+
   // Fetch all students
   const {
     data: students = [],
@@ -254,6 +257,25 @@ export function AdminStudentsView() {
     onError: (err: any) => {
       const msg = err.response?.data?.message || err.message || 'Failed to remove student from session.';
       setSessionActionError(msg);
+      showToast(msg, 'error');
+    },
+  });
+
+  // Mutation to delete student account
+  const deleteStudentMutation = useMutation({
+    mutationFn: (id: number) => adminApi.deleteStudent(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-crm-students'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      showToast('Student account deleted successfully.', 'success');
+      setStudentToDelete(null);
+      if (selectedStudentId === studentToDelete?.id) {
+        handleCloseModal();
+      }
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.message || 'Failed to delete student account.';
       showToast(msg, 'error');
     },
   });
@@ -597,14 +619,24 @@ export function AdminStudentsView() {
 
                       {/* Actions */}
                       <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenStudent(student, 'details')}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 text-slate-600 text-xs font-semibold shadow-xs transition"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Details</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenStudent(student, 'details')}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 text-slate-600 text-xs font-semibold shadow-xs transition cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Details</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setStudentToDelete({ id: student.id, name: student.name })}
+                            className="p-1.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 transition shadow-xs cursor-pointer"
+                            title={`Delete ${student.name}'s account`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -1302,6 +1334,61 @@ export function AdminStudentsView() {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Student Permanent Confirmation Modal */}
+      {studentToDelete !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-base">Delete Student Account</h3>
+                <p className="text-xs text-slate-500">Permanent action cannot be undone</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed mb-4">
+              Are you sure you want to permanently delete <strong className="text-slate-900">{studentToDelete.name}</strong>?
+              This will remove their login account, student profile, homework submissions, session enrollments, and associated tickets.
+            </p>
+
+            <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-800 mb-6">
+              <p className="font-bold mb-0.5">Warning:</p>
+              All academic credits and session bookings tied to this student will be permanently erased.
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setStudentToDelete(null)}
+                className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deleteStudentMutation.isPending}
+                onClick={() => deleteStudentMutation.mutate(studentToDelete.id)}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
+              >
+                {deleteStudentMutation.isPending ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Permanently</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

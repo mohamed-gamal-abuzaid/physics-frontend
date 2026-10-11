@@ -514,6 +514,116 @@ export interface PackageTier {
   creditType?: '1-to-1' | 'group';
 }
 
+// ─── Level Session Pricing & Discounts ────────────────────────────────────────
+
+export interface LevelSessionPricing {
+  id: number;
+  levelName: string;
+  stageCode?: string | null;
+  sessionFormat: 'PRIVATE' | 'GROUP';
+  sessionsCount: number;
+  title: string;
+  price: string | number;
+  currency: string;
+  description?: string | null;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateLevelPricingPayload {
+  levelName: string;
+  stageCode?: string;
+  sessionFormat: 'PRIVATE' | 'GROUP';
+  sessionsCount: number;
+  title: string;
+  price: number;
+  currency?: string;
+  description?: string;
+  isActive?: boolean;
+}
+
+export type DiscountScope = 'ALL' | 'LEVEL' | 'STUDENT';
+export type DiscountType = 'PERCENTAGE' | 'FIXED';
+
+export interface Discount {
+  id: number;
+  code: string;
+  title: string;
+  description?: string | null;
+  scope: DiscountScope;
+  targetLevel?: string | null;
+  targetStudentId?: number | null;
+  discountType: DiscountType;
+  value: string | number;
+  minSessionsCount?: number | null;
+  maxUsageCount?: number | null;
+  currentUsageCount?: number;
+  validFrom?: string | null;
+  validUntil?: string | null;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateDiscountPayload {
+  code: string;
+  title: string;
+  description?: string;
+  scope: DiscountScope;
+  targetLevel?: string;
+  targetStudentId?: number;
+  discountType: DiscountType;
+  value: number;
+  minSessionsCount?: number;
+  maxUsageCount?: number;
+  validFrom?: string;
+  validUntil?: string;
+  isActive?: boolean;
+}
+
+export interface StudentPricingOption extends LevelSessionPricing {
+  originalPrice: number;
+  discountAmount: number;
+  finalPrice: number;
+  hasDiscount: boolean;
+  applicableDiscount?: {
+    id: number;
+    code: string;
+    title: string;
+    discountType: DiscountType;
+    value: number;
+    scope: DiscountScope;
+  } | null;
+}
+
+export interface StudentPricingResponse {
+  pricing: StudentPricingOption[];
+  studentLevel: string | null;
+  availableDiscounts: {
+    code: string;
+    title: string;
+    scope: DiscountScope;
+    discountType: DiscountType;
+    value: number;
+  }[];
+}
+
+export interface PriceCalculationResult {
+  pricing: LevelSessionPricing;
+  originalPrice: number;
+  discountAmount: number;
+  finalPrice: number;
+  discountApplied?: {
+    id: number;
+    code: string;
+    title: string;
+    discountType: DiscountType;
+    value: number;
+    scope: DiscountScope;
+  } | null;
+}
+
 // ─── Admin / CRM ─────────────────────────────────────────────────────────────
 
 export interface AdminRecord {

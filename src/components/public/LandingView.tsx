@@ -462,68 +462,32 @@ function SessionPricingSection({
 }) {
   const currency = pricing?.currency ?? 'EGP';
   const { isAuthenticated } = useAuth();
-  const {
-    setIsFreeTrialOpen,
-    setIsSignInOpen,
-    setSelectedPlanForTopUp,
-    setIsTopUpOpen,
-    setPendingAuthAction,
-    showToast,
-  } = useUI();
+  const { setIsFreeTrialOpen, setIsSignInOpen } = useUI();
 
   const cards = [
     {
-      title: 'Private 1-to-1',
+      title: 'Private 1-to-1 Sessions',
       price: pricing?.oneToOneRate ?? 600,
-      format: '1-to-1' as const,
-      sessionsCount: 4,
       description: 'Fully personalised sessions tailored to your exact curriculum, exam board, and pace.',
       features: ['100% customised pacing', 'Direct 1-on-1 feedback every session', 'High-definition session recordings'],
       highlight: false,
     },
     {
-      title: 'Group (7+ students)',
+      title: 'Group Sessions (7+ students)',
       price: pricing?.groupRate7Plus ?? 300,
-      format: 'group' as const,
-      sessionsCount: 4,
-      description: 'Collaborative learning in larger cohorts — unbeatable value with rigorous problem sets.',
+      description: 'Collaborative learning in structured cohorts — unbeatable value with rigorous problem sets.',
       features: ['Peer discussion & shared problem sets', 'Formula sheets & lecture notes', 'Weekly live Q&A roundups'],
       highlight: true,
-      badge: 'Most Popular',
+      badge: 'Popular Format',
     },
     {
-      title: 'Small Group (<7)',
+      title: 'Small Cohorts (<7 students)',
       price: pricing?.groupRateUnder7 ?? 250,
-      format: 'group' as const,
-      sessionsCount: 4,
       description: 'Intimate group sessions combining deep personalization with energetic team dynamics.',
       features: ['High interactive engagement per student', 'Flexible scheduling windows', 'Shared notes & assignment hub'],
       highlight: false,
     },
   ];
-
-  const handleSelectPlan = (card: (typeof cards)[0]) => {
-    const planData: SelectedPlanData = {
-      title: card.title,
-      format: card.format,
-      rate: card.price,
-      sessionsCount: card.sessionsCount,
-      currency,
-    };
-
-    setSelectedPlanForTopUp(planData);
-
-    if (isAuthenticated) {
-      setIsTopUpOpen(true);
-    } else {
-      setPendingAuthAction({
-        type: 'buy_plan',
-        plan: planData,
-      });
-      showToast(`Please sign in or register to purchase the ${card.title} package.`, 'info');
-      setIsSignInOpen(true);
-    }
-  };
 
   return (
     <section className="py-20 bg-white">
@@ -531,20 +495,18 @@ function SessionPricingSection({
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold rounded-full mb-3">
             <CreditCard className="w-3.5 h-3.5" />
-            <span>Packages &amp; Subscriptions</span>
+            <span>Learning Formats &amp; Tuition</span>
           </div>
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
-            Transparent Session Pricing
+            Flexible Physics Tutoring Formats
           </h2>
           <p className="text-slate-500 max-w-xl mx-auto text-sm">
-            Invest in academic excellence. No hidden fees, instant activation, and your prepaid credits never expire.
+            Invest in academic excellence. Rates vary by academic level and format. Log into your student portal to explore custom packages and active promotional discounts.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {cards.map((card) => {
-            const packageTotal = card.price * card.sessionsCount;
-
             return (
               <div
                 key={card.title}
@@ -563,21 +525,13 @@ function SessionPricingSection({
                 <div>
                   <h3 className="text-lg font-bold text-slate-900 mb-1">{card.title}</h3>
                   <div className="flex items-baseline gap-1 my-3">
-                    <span className="text-3xl font-black text-slate-900">
+                    <span className="text-xs font-semibold text-slate-500">Starting from</span>
+                    <span className="text-3xl font-black text-slate-900 ml-1">
                       {card.price.toLocaleString()}
                     </span>
                     <span className="text-xs font-semibold text-slate-400">
                       {currency} / session
                     </span>
-                  </div>
-
-                  <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-600 mb-4">
-                    <div className="flex justify-between font-semibold">
-                      <span>4-Session Starter Pack:</span>
-                      <span className="text-indigo-600 font-bold">
-                        {packageTotal.toLocaleString()} {currency}
-                      </span>
-                    </div>
                   </div>
 
                   <p className="text-xs text-slate-500 leading-relaxed mb-6">
@@ -597,23 +551,24 @@ function SessionPricingSection({
                 <div className="space-y-2 pt-2 border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={() => handleSelectPlan(card)}
+                    onClick={() => setIsFreeTrialOpen(true)}
                     className={`w-full py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5 ${
                       card.highlight
                         ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200'
                         : 'bg-slate-900 text-white hover:bg-black'
                     }`}
                   >
-                    <CreditCard className="w-4 h-4" />
-                    <span>Choose Plan ({card.sessionsCount} Sessions)</span>
+                    <span>Book a Diagnostic Free Trial</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsFreeTrialOpen(true)}
-                    className="w-full py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
-                  >
-                    Or book a diagnostic free trial →
-                  </button>
+                  {!isAuthenticated && (
+                    <button
+                      type="button"
+                      onClick={() => setIsSignInOpen(true)}
+                      className="w-full py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                    >
+                      Already enrolled? Sign in to view rates →
+                    </button>
+                  )}
                 </div>
               </div>
             );

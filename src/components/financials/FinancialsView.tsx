@@ -34,7 +34,7 @@ export function FinancialsView() {
   // Queries
   const { data: proofs = [], isLoading: loadingProofs } = useQuery<ManualPaymentProof[]>({
     queryKey: isAdmin ? ['admin-payments'] : ['student-payments'],
-    queryFn: isAdmin ? adminApi.getPayments : studentApi.getPayments,
+    queryFn: () => (isAdmin ? adminApi.getPayments() : studentApi.getPayments()),
   });
 
   const { data: invoices = [], isLoading: loadingInvoices } = useQuery<Invoice[]>({

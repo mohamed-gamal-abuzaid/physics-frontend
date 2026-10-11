@@ -17,6 +17,10 @@ import type {
   OutboxEmail,
   BroadcastNotificationData,
   AdminCreateSessionData,
+  LevelSessionPricing,
+  CreateLevelPricingPayload,
+  Discount,
+  CreateDiscountPayload,
 } from '../types';
 
 export const adminApi = {
@@ -340,6 +344,48 @@ export const adminApi = {
   createSession: async (data: AdminCreateSessionData): Promise<BookingSession> => {
     const res = await apiClient.post<any>('/api/admin/sessions', data);
     return res.data?.session ?? res.data;
+  },
+
+  // Delete Student
+  deleteStudent: async (id: number): Promise<{ success: boolean; message: string }> => {
+    const res = await apiClient.delete<any>(`/api/admin/crm/students/${id}`);
+    return res.data;
+  },
+
+  // Level Session Pricing CRUD
+  getLevelPricingList: async (params?: { level?: string; format?: string }): Promise<LevelSessionPricing[]> => {
+    const res = await apiClient.get<any>('/api/admin/level-pricing', { params });
+    return unwrapList<LevelSessionPricing>(res.data?.pricing ?? res.data);
+  },
+  createLevelPricing: async (data: CreateLevelPricingPayload): Promise<LevelSessionPricing> => {
+    const res = await apiClient.post<any>('/api/admin/level-pricing', data);
+    return res.data?.pricing ?? res.data;
+  },
+  updateLevelPricing: async (id: number, data: Partial<CreateLevelPricingPayload>): Promise<LevelSessionPricing> => {
+    const res = await apiClient.patch<any>(`/api/admin/level-pricing/${id}`, data);
+    return res.data?.pricing ?? res.data;
+  },
+  deleteLevelPricing: async (id: number): Promise<{ success: boolean; message: string }> => {
+    const res = await apiClient.delete<any>(`/api/admin/level-pricing/${id}`);
+    return res.data;
+  },
+
+  // Discounts CRUD
+  getDiscounts: async (params?: { scope?: string; activeOnly?: boolean }): Promise<Discount[]> => {
+    const res = await apiClient.get<any>('/api/admin/discounts', { params });
+    return unwrapList<Discount>(res.data?.discounts ?? res.data);
+  },
+  createDiscount: async (data: CreateDiscountPayload): Promise<Discount> => {
+    const res = await apiClient.post<any>('/api/admin/discounts', data);
+    return res.data?.discount ?? res.data;
+  },
+  updateDiscount: async (id: number, data: Partial<CreateDiscountPayload>): Promise<Discount> => {
+    const res = await apiClient.patch<any>(`/api/admin/discounts/${id}`, data);
+    return res.data?.discount ?? res.data;
+  },
+  deleteDiscount: async (id: number): Promise<{ success: boolean; message: string }> => {
+    const res = await apiClient.delete<any>(`/api/admin/discounts/${id}`);
+    return res.data;
   },
 
   // Broadcast Notifications

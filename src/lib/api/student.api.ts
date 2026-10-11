@@ -13,6 +13,8 @@ import type {
   SupportTicket,
   TicketMessage,
   AvailableSlotsResponse,
+  StudentPricingResponse,
+  PriceCalculationResult,
 } from '../types';
 
 export const studentApi = {
@@ -112,8 +114,8 @@ export const studentApi = {
   },
 
   // Payments
-  getPayments: async (): Promise<ManualPaymentProof[]> => {
-    const res = await apiClient.get<any>('/api/student/payments');
+  getPayments: async (params?: { page?: number; limit?: number; status?: string }): Promise<ManualPaymentProof[]> => {
+    const res = await apiClient.get<any>('/api/student/payments', { params });
     return unwrapList<ManualPaymentProof>(res.data?.payments ?? res.data);
   },
   createPayment: async (data: {
@@ -126,9 +128,23 @@ export const studentApi = {
     transactionRef?: string;
     screenshotUrl: string;
     notes?: string;
+    pricingId?: number;
+    discountCode?: string;
+    originalAmount?: number;
+    discountAmount?: number;
   }): Promise<ManualPaymentProof> => {
     const res = await apiClient.post<any>('/api/student/payments', data);
     return res.data?.payment ?? res.data;
+  },
+
+  // Level Pricing & Discounts
+  getPricing: async (params?: { level?: string; format?: 'PRIVATE' | 'GROUP' }): Promise<StudentPricingResponse> => {
+    const res = await apiClient.get<any>('/api/student/pricing', { params });
+    return res.data;
+  },
+  calculatePrice: async (data: { pricingId: number; discountCode?: string }): Promise<PriceCalculationResult> => {
+    const res = await apiClient.post<any>('/api/student/pricing/calculate', data);
+    return res.data;
   },
 
   // Invoices

@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUI } from '@/contexts/UIContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { studentApi } from '@/lib/api/student.api';
 import {
   X, Zap, CheckCircle2, Smartphone, PhoneCall, Building2,
-  Upload, Copy, Check, ShieldCheck, Clock
+  Upload, Copy, Check, ShieldCheck, Clock, Tag, Percent, ArrowRight
 } from 'lucide-react';
 import { compressImage } from '@/lib/imageCompressor';
+import type { StudentPricingOption } from '@/lib/types';
 
 const PAYMENT_METHODS = [
   {
@@ -38,11 +39,25 @@ const PAYMENT_METHODS = [
 ];
 
 export function TopUpModal() {
-  const { isTopUpOpen, setIsTopUpOpen, showToast, selectedPlanForTopUp } = useUI();
+  const { isTopUpOpen, setIsTopUpOpen, showToast } = useUI();
   const queryClient = useQueryClient();
 
-  const [sessionFormat, setSessionFormat] = useState<'1-to-1' | 'group'>('1-to-1');
-  const [sessionsCount, setSessionsCount] = useState<number>(4);
+  const [sessionFormat, setSessionFormat] = useState<'PRIVATE' | 'GROUP'>('PRIVATE');
+  const [selectedPricingId, setSelectedPricingId] = useState<number | null>(null);
+
+  // Coupon / Discount state
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [customDiscount, setCustomDiscount] = useState<{
+    discountAmount: number;
+    finalPrice: number;
+    title: string;
+    code: string;
+  } | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
+  // Payment form state
   const [selectedMethod, setSelectedMethod] = useState('InstaPay');
   const [senderAccountOrPhone, setSenderAccountOrPhone] = useState('');
   const [transactionRef, setTransactionRef] = useState('');
@@ -50,37 +65,115 @@ export function TopUpModal() {
   const [notes, setNotes] = useState('');
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
 
-  // Synchronize with selected plan whenever modal opens or plan changes
-  React.useEffect(() => {
-    if (selectedPlanForTopUp) {
-      setSessionFormat(selectedPlanForTopUp.format);
-      if (selectedPlanForTopUp.sessionsCount) {
-        setSessionsCount(selectedPlanForTopUp.sessionsCount);
-      }
-    }
-  }, [selectedPlanForTopUp, isTopUpOpen]);
+  // Fetch level-based pricing and available discounts for this student
+  const {
+    data: pricingResponse,
+    isLoading: isLoadingPricing,
+  } = useQuery({
+    queryKey: ['student-pricing', sessionFormat],
+    queryFn: () => studentApi.getPricing({ format: sessionFormat }),
+    enabled: isTopUpOpen,
+  });
 
-  // Dynamic rate calculation based on chosen plan or format
-  const ratePerSession =
-    selectedPlanForTopUp && selectedPlanForTopUp.format === sessionFormat
-      ? selectedPlanForTopUp.rate
-      : sessionFormat === '1-to-1'
-      ? 600
-      : 300;
-  const totalAmount = sessionsCount * ratePerSession;
+  const pricingList: StudentPricingOption[] = pricingResponse?.pricing || [];
+  const studentLevel = pricingResponse?.studentLevel;
+
+  // Automatically select first pricing package or keep selection
+  useEffect(() => {
+    if (pricingList.length > 0) {
+      if (!selectedPricingId || !pricingList.some((p) => p.id === selectedPricingId)) {
+        setSelectedPricingId(pricingList[0].id);
+      }
+    } else {
+      setSelectedPricingId(null);
+    }
+  }, [pricingList, selectedPricingId]);
+
+  // Selected package
+  const activePackage = pricingList.find((p) => p.id === selectedPricingId) || null;
+
+  // Reset coupon state when package changes
+  useEffect(() => {
+    setCustomDiscount(null);
+    setAppliedCoupon(null);
+    setCouponError(null);
+  }, [selectedPricingId]);
+
+  // Handle applying coupon code
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    if (!selectedPricingId) {
+      showToast('Please select a session package first.', 'error');
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    setCouponError(null);
+    try {
+      const res = await studentApi.calculatePrice({
+        pricingId: selectedPricingId,
+        discountCode: couponInput.trim(),
+      });
+      setAppliedCoupon(couponInput.trim().toUpperCase());
+      setCustomDiscount({
+        discountAmount: res.discountAmount,
+        finalPrice: res.finalPrice,
+        title: res.discountApplied?.title || 'Promo Code Applied',
+        code: res.discountApplied?.code || couponInput.trim().toUpperCase(),
+      });
+      showToast(`Coupon "${couponInput.trim().toUpperCase()}" applied successfully!`, 'success');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Invalid or expired coupon code.';
+      setCouponError(msg);
+      showToast(msg, 'error');
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponInput('');
+    setAppliedCoupon(null);
+    setCustomDiscount(null);
+    setCouponError(null);
+  };
+
+  // Pricing calculations
+  const originalPrice = activePackage ? Number(activePackage.price) : 0;
+  const autoDiscountAmount = activePackage?.hasDiscount ? activePackage.discountAmount : 0;
+  const discountAmount = customDiscount ? customDiscount.discountAmount : autoDiscountAmount;
+  const finalPayable = customDiscount
+    ? customDiscount.finalPrice
+    : activePackage
+    ? activePackage.finalPrice
+    : originalPrice;
+  const activeDiscountCode = customDiscount
+    ? customDiscount.code
+    : activePackage?.applicableDiscount?.code || undefined;
 
   const paymentMutation = useMutation({
     mutationFn: studentApi.createPayment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['student-payments'] });
       queryClient.invalidateQueries({ queryKey: ['admin-payments'] });
-      showToast('Payment proof submitted successfully! Staff will verify and grant credits.', 'success');
+      showToast('Payment proof submitted successfully! Staff will verify and credit your account.', 'success');
       setIsTopUpOpen(false);
+      handleResetForm();
     },
     onError: (err: any) => {
       showToast(err?.response?.data?.message || 'Failed to submit payment proof.', 'error');
     },
   });
+
+  const handleResetForm = () => {
+    setSenderAccountOrPhone('');
+    setTransactionRef('');
+    setScreenshotUrl('');
+    setNotes('');
+    setCouponInput('');
+    setAppliedCoupon(null);
+    setCustomDiscount(null);
+  };
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -108,8 +201,8 @@ export function TopUpModal() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sessionsCount || sessionsCount <= 0) {
-      showToast('Please select at least 1 session to top up.', 'error');
+    if (!activePackage) {
+      showToast('Please select a session package.', 'error');
       return;
     }
     if (!senderAccountOrPhone.trim()) {
@@ -120,16 +213,21 @@ export function TopUpModal() {
       showToast('Please upload or attach a screenshot of your transfer receipt.', 'error');
       return;
     }
+
     paymentMutation.mutate({
-      packageName: selectedPlanForTopUp?.title || `${sessionsCount} ${sessionFormat === '1-to-1' ? 'Private 1-on-1' : 'Group'} Sessions`,
-      sessionsCount,
-      creditType: sessionFormat,
-      amount: totalAmount,
+      packageName: activePackage.title,
+      sessionsCount: activePackage.sessionsCount,
+      creditType: sessionFormat === 'PRIVATE' ? '1-to-1' : 'group',
+      amount: finalPayable,
       paymentMethod: selectedMethod,
       senderAccountOrPhone: senderAccountOrPhone.trim(),
       transactionRef: transactionRef.trim() || undefined,
       screenshotUrl,
       notes: notes.trim() || undefined,
+      pricingId: activePackage.id,
+      discountCode: activeDiscountCode,
+      originalAmount: originalPrice,
+      discountAmount: discountAmount,
     });
   };
 
@@ -144,8 +242,10 @@ export function TopUpModal() {
                 <Zap className="w-5 h-5 text-indigo-400" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-white">Top Up Session Credits</h3>
-                <p className="text-xs text-indigo-200">Submit a manual transfer receipt for instant credit verification</p>
+                <h3 className="font-bold text-lg text-white">Purchase Physics Sessions</h3>
+                <p className="text-xs text-indigo-200">
+                  {studentLevel ? `Custom rates for: ${studentLevel}` : 'Choose sessions & apply promotional discounts'}
+                </p>
               </div>
             </div>
             <button
@@ -158,85 +258,189 @@ export function TopUpModal() {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-          {/* Selected Plan Banner */}
-          {selectedPlanForTopUp && (
-            <div className="bg-indigo-50/80 border border-indigo-200/80 rounded-xl p-3 flex items-center justify-between text-xs">
-              <div>
-                <div className="flex items-center gap-1.5 font-bold text-indigo-900">
-                  <span className="w-2 h-2 rounded-full bg-indigo-600" />
-                  <span>{selectedPlanForTopUp.title}</span>
-                </div>
-                <p className="text-[11px] text-indigo-600 mt-0.5">
-                  Pre-configured rate: {ratePerSession} EGP / session
-                </p>
+          {/* Format Selector */}
+          <div>
+            <label className="text-xs font-bold text-slate-700 block mb-1.5">Tuition Format</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setSessionFormat('PRIVATE')}
+                className={`py-2 px-3 text-xs font-bold rounded-xl border text-center transition-all ${
+                  sessionFormat === 'PRIVATE'
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                Private 1-on-1 Sessions
+              </button>
+              <button
+                type="button"
+                onClick={() => setSessionFormat('GROUP')}
+                className={`py-2 px-3 text-xs font-bold rounded-xl border text-center transition-all ${
+                  sessionFormat === 'GROUP'
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                Group Sessions
+              </button>
+            </div>
+          </div>
+
+          {/* Package Selection Cards */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-bold text-slate-700">Available Packages for your Level</label>
+              {studentLevel && (
+                <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                  Level: {studentLevel}
+                </span>
+              )}
+            </div>
+
+            {isLoadingPricing ? (
+              <div className="p-6 text-center text-xs text-slate-400 border border-slate-200 rounded-xl">
+                Loading rates for your level...
               </div>
-              <div className="text-right">
-                <span className="text-[10px] text-indigo-500 font-semibold block uppercase">Total Due</span>
-                <span className="font-extrabold text-indigo-700 text-sm">{totalAmount.toLocaleString()} EGP</span>
+            ) : pricingList.length === 0 ? (
+              <div className="p-4 text-center text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-xl">
+                No specific package listed for your level yet. Please contact admin or tutor.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {pricingList.map((pkg) => {
+                  const isSelected = selectedPricingId === pkg.id;
+                  const perSession = Math.round(Number(pkg.price) / (pkg.sessionsCount || 1));
+
+                  return (
+                    <div
+                      key={pkg.id}
+                      onClick={() => setSelectedPricingId(pkg.id)}
+                      className={`p-3 rounded-xl border cursor-pointer transition-all relative ${
+                        isSelected
+                          ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/30'
+                          : 'border-slate-200 hover:border-slate-300 bg-white'
+                      }`}
+                    >
+                      {pkg.hasDiscount && (
+                        <span className="absolute -top-2.5 right-3 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                          {pkg.applicableDiscount?.discountType === 'PERCENTAGE'
+                            ? `${pkg.applicableDiscount.value}% OFF`
+                            : `Save ${pkg.discountAmount} EGP`}
+                        </span>
+                      )}
+
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h4 className="font-bold text-xs text-slate-900">{pkg.title}</h4>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            {pkg.sessionsCount} {pkg.sessionsCount === 1 ? 'session' : 'sessions'} · ~{perSession} {pkg.currency}/ea
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          {pkg.hasDiscount ? (
+                            <div>
+                              <span className="text-[10px] text-slate-400 line-through block">
+                                {Number(pkg.price).toLocaleString()}
+                              </span>
+                              <span className="font-black text-indigo-700 text-sm">
+                                {pkg.finalPrice.toLocaleString()} {pkg.currency}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="font-black text-slate-900 text-sm">
+                              {Number(pkg.price).toLocaleString()} {pkg.currency}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Coupon Code Input */}
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Tag className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Have a Promo or Referral Code?</span>
+            </label>
+
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl text-xs">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <div>
+                    <span className="font-mono font-bold text-emerald-800">{appliedCoupon}</span>
+                    <span className="text-[11px] text-emerald-600 ml-2">({customDiscount?.title})</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveCoupon}
+                  className="text-xs text-rose-600 hover:text-rose-700 font-bold p-1"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => {
+                    setCouponInput(e.target.value.toUpperCase());
+                    setCouponError(null);
+                  }}
+                  placeholder="Enter discount coupon code..."
+                  className="flex-1 text-xs px-3 py-2 bg-white rounded-xl border border-slate-200 font-mono uppercase font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  type="button"
+                  disabled={!couponInput.trim() || isApplyingCoupon}
+                  onClick={handleApplyCoupon}
+                  className="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
+                >
+                  {isApplyingCoupon ? 'Verifying...' : 'Apply Code'}
+                </button>
+              </div>
+            )}
+
+            {couponError && <p className="text-[11px] text-rose-600">{couponError}</p>}
+          </div>
+
+          {/* Price Breakdown / Summary */}
+          {activePackage && (
+            <div className="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-3.5 space-y-1.5 text-xs">
+              <div className="flex justify-between text-slate-600">
+                <span>Original Package Price:</span>
+                <span className="font-semibold">{originalPrice.toLocaleString()} EGP</span>
+              </div>
+
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-emerald-700 font-semibold">
+                  <span className="flex items-center gap-1">
+                    <Percent className="w-3 h-3" />
+                    <span>Discount Applied ({activeDiscountCode || 'Level Offer'}):</span>
+                  </span>
+                  <span>-{discountAmount.toLocaleString()} EGP</span>
+                </div>
+              )}
+
+              <div className="pt-2 border-t border-indigo-200/60 flex justify-between items-baseline font-bold text-slate-900">
+                <span className="text-sm">Total Payable Amount:</span>
+                <span className="text-xl font-black text-indigo-700">
+                  {finalPayable.toLocaleString()} EGP
+                </span>
               </div>
             </div>
           )}
 
-          {/* Format & Sessions */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Session Type</label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSessionFormat('1-to-1')}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl border text-center transition-all ${
-                    sessionFormat === '1-to-1'
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  1-on-1 ({ratePerSession} EGP)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSessionFormat('group')}
-                  className={`flex-1 py-2 text-xs font-bold rounded-xl border text-center transition-all ${
-                    sessionFormat === 'group'
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Group ({sessionFormat === 'group' ? ratePerSession : (selectedPlanForTopUp?.format === 'group' ? selectedPlanForTopUp.rate : 300)} EGP)
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Number of Sessions</label>
-              <div className="flex items-center gap-2">
-                {[2, 4, 8, 12].map((cnt) => (
-                  <button
-                    key={cnt}
-                    type="button"
-                    onClick={() => setSessionsCount(cnt)}
-                    className={`flex-1 py-2 text-xs font-bold rounded-xl border text-center transition-all ${
-                      sessionsCount === cnt
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {cnt}x
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Amount summary */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between">
-            <span className="text-xs text-slate-600 font-medium">Total Payable Amount:</span>
-            <span className="text-lg font-extrabold text-indigo-700">EGP {totalAmount.toLocaleString()}</span>
-          </div>
-
           {/* Payment Methods */}
           <div>
-            <label className="text-xs font-semibold text-slate-700 block mb-2">Select Transfer Method</label>
+            <label className="text-xs font-bold text-slate-700 block mb-2">Select Transfer Method</label>
             <div className="grid grid-cols-1 gap-2">
               {PAYMENT_METHODS.map((method) => {
                 const isSelected = selectedMethod === method.id;
@@ -253,7 +457,9 @@ export function TopUpModal() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${method.color} text-white flex items-center justify-center shrink-0`}>
+                        <div
+                          className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${method.color} text-white flex items-center justify-center shrink-0`}
+                        >
                           <Icon className="w-3.5 h-3.5" />
                         </div>
                         <div>
@@ -292,7 +498,7 @@ export function TopUpModal() {
           {/* Sender details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Sender Mobile / Account</label>
+              <label className="text-xs font-bold text-slate-700 block mb-1">Sender Mobile / Account</label>
               <input
                 required
                 type="text"
@@ -303,7 +509,9 @@ export function TopUpModal() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Reference / Transaction ID (Optional)</label>
+              <label className="text-xs font-bold text-slate-700 block mb-1">
+                Reference / Transaction ID (Optional)
+              </label>
               <input
                 type="text"
                 value={transactionRef}
@@ -316,7 +524,7 @@ export function TopUpModal() {
 
           {/* Screenshot Upload */}
           <div>
-            <label className="text-xs font-semibold text-slate-700 block mb-1">Receipt Screenshot</label>
+            <label className="text-xs font-bold text-slate-700 block mb-1">Receipt Screenshot</label>
             <div className="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-4 text-center cursor-pointer transition-colors relative">
               <input
                 type="file"
@@ -326,12 +534,16 @@ export function TopUpModal() {
               />
               {screenshotUrl ? (
                 <div className="flex items-center justify-center gap-3">
-                  <img src={screenshotUrl} alt="Receipt preview" className="w-16 h-16 object-cover rounded-lg border border-slate-200" />
+                  <img
+                    src={screenshotUrl}
+                    alt="Receipt preview"
+                    className="w-16 h-16 object-cover rounded-lg border border-slate-200"
+                  />
                   <div className="text-left">
                     <p className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Screenshot attached
                     </p>
-                    <p className="text-[11px] text-slate-500">Click to change file</p>
+                    <p className="text-[11px] text-slate-500">Click to replace file</p>
                   </div>
                 </div>
               ) : (
@@ -355,10 +567,10 @@ export function TopUpModal() {
             </button>
             <button
               type="submit"
-              disabled={paymentMutation.isPending}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition-all disabled:opacity-50"
+              disabled={paymentMutation.isPending || !activePackage}
+              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 transition-all disabled:opacity-50 cursor-pointer"
             >
-              {paymentMutation.isPending ? 'Submitting...' : 'Submit Payment Proof'}
+              {paymentMutation.isPending ? 'Submitting...' : `Submit Payment (${finalPayable.toLocaleString()} EGP)`}
             </button>
           </div>
         </form>
