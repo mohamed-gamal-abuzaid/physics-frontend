@@ -78,6 +78,8 @@ export function CreateAssignmentModal({ isOpen, onClose }: CreateAssignmentModal
     },
   });
 
+  const [externalLink, setExternalLink] = useState('');
+
   const handleReset = () => {
     setTitle('');
     setCourse('IGCSE Physics (0625)');
@@ -90,14 +92,15 @@ export function CreateAssignmentModal({ isOpen, onClose }: CreateAssignmentModal
     setTargetCohort('');
     setSelectedStudentId('');
     setUploadedFile(null);
+    setExternalLink('');
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 15 * 1024 * 1024) {
-      showToast('File size exceeds 15 MB limit. Please select a smaller file.', 'error');
+    if (file.size > 3 * 1024 * 1024) {
+      showToast('File exceeds 3 MB serverless limit for direct upload. For larger files, please paste a Google Drive link below.', 'error');
       return;
     }
 
@@ -143,6 +146,12 @@ export function CreateAssignmentModal({ isOpen, onClose }: CreateAssignmentModal
       return;
     }
 
+    const finalAttachments = uploadedFile
+      ? [uploadedFile]
+      : externalLink.trim()
+        ? [{ name: 'Worksheet Link', size: 'Cloud Link', type: 'link', fileUrl: externalLink.trim() }]
+        : undefined;
+
     const payload: any = {
       title: title.trim(),
       course: course.trim(),
@@ -155,7 +164,7 @@ export function CreateAssignmentModal({ isOpen, onClose }: CreateAssignmentModal
       targetCohort: targetScope === 'GROUP' ? targetCohort.trim() : undefined,
       studentId: targetScope === 'STUDENT' ? Number(selectedStudentId) : undefined,
       assignedStudentIds: targetScope === 'STUDENT' && selectedStudentId ? [Number(selectedStudentId)] : undefined,
-      attachments: uploadedFile ? [uploadedFile] : undefined,
+      attachments: finalAttachments,
     };
 
     createMutation.mutate(payload);
@@ -266,6 +275,17 @@ export function CreateAssignmentModal({ isOpen, onClose }: CreateAssignmentModal
             <p className="text-[10px] text-slate-500 mt-1.5">
               Targeted students will be able to download this worksheet directly and upload their completed solution.
             </p>
+
+            <div className="mt-2.5 pt-2 border-t border-indigo-100 flex items-center gap-2">
+              <span className="text-[10px] text-slate-500 shrink-0 font-medium">Or paste link (for large files &gt; 3MB):</span>
+              <input
+                type="url"
+                value={externalLink}
+                onChange={(e) => setExternalLink(e.target.value)}
+                placeholder="https://drive.google.com/..."
+                className="w-full px-2.5 py-1 text-[11px] bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+              />
+            </div>
           </div>
 
           {/* Scope Selection: ALL | LEVEL | GROUP | STUDENT */}

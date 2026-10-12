@@ -108,8 +108,9 @@ export function UploadResourceModal({ isOpen, onClose }: UploadResourceModalProp
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 25 * 1024 * 1024) {
-      showToast('File size exceeds 25 MB limit.', 'error');
+    if (file.size > 3 * 1024 * 1024) {
+      showToast('File exceeds 3 MB serverless direct upload limit. Switched to Cloud Link tab to paste a Google Drive or Cloud link.', 'info');
+      setUploadMode('LINK');
       return;
     }
 

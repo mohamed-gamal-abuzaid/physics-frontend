@@ -13,10 +13,12 @@ export function AccountSettingsModal() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  const isStudent = user?.role?.toUpperCase() !== 'ADMIN';
+
   const { data: profile } = useQuery({
     queryKey: ['student-profile'],
     queryFn: studentApi.getProfile,
-    enabled: isAccountSettingsOpen,
+    enabled: isAccountSettingsOpen && isStudent,
   });
 
   const [name, setName] = useState('');

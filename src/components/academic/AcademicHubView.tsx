@@ -57,7 +57,7 @@ export function AcademicHubView() {
 
   const { data: resources = [] } = useQuery<ResourceItem[]>({
     queryKey: ['resources'],
-    queryFn: () => studentApi.getResources(),
+    queryFn: () => (isAdmin ? adminApi.getResources() : studentApi.getResources()),
   });
 
   const downloadMutation = useMutation({
