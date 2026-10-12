@@ -155,6 +155,9 @@ export interface HomeworkAssignment {
   maxPoints?: number;
   description: string;
   attachments?: { name: string; size: string; type: string; fileUrl?: string }[];
+  targetScope?: 'ALL' | 'LEVEL' | 'GROUP' | 'STUDENT';
+  targetLevel?: string;
+  targetCohort?: string;
   studentId?: number;
   assignedStudentIds?: number[];
   createdAt?: string;
@@ -189,7 +192,7 @@ export type ResourceCategory =
   | 'Exam Solutions'
   | 'Video Masterclass';
 
-export type ResourceFormat = 'PDF' | 'DOCX' | 'MP4' | 'Interactive SIM';
+export type ResourceFormat = 'PDF' | 'DOCX' | 'MP4' | 'Interactive SIM' | string;
 
 export interface ResourceItem {
   id: number;
@@ -206,6 +209,10 @@ export interface ResourceItem {
   previewUrl?: string;
   fileUrl?: string;
   badge?: string;
+  targetScope?: 'ALL' | 'LEVEL' | 'GROUP' | 'STUDENT';
+  targetLevel?: string;
+  targetCohort?: string;
+  targetStudentId?: number;
 }
 
 // ─── Invoices ─────────────────────────────────────────────────────────────────

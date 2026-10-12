@@ -93,13 +93,20 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
     <div className="flex flex-col h-full bg-slate-900 text-slate-300">
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
-        <div className="flex items-center justify-center w-9 h-9 bg-indigo-600 rounded-xl shrink-0">
-          <Atom className="w-5 h-5 text-white" />
-        </div>
-        <div className="overflow-hidden">
-          <p className="text-white font-bold text-sm leading-tight truncate">Mr. Mohammed Sayed</p>
-          <p className="text-indigo-400 text-xs leading-tight">Physics Academy</p>
-        </div>
+        <Link
+          href="/landing"
+          onClick={onCloseMobile}
+          className="flex items-center gap-3 overflow-hidden group transition-opacity hover:opacity-90 cursor-pointer"
+          title="Return to Landing Page"
+        >
+          <div className="flex items-center justify-center w-9 h-9 bg-indigo-600 rounded-xl shrink-0 group-hover:scale-105 transition-transform">
+            <Atom className="w-5 h-5 text-white" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-white font-bold text-sm leading-tight truncate">Mr. Mohammed Sayed</p>
+            <p className="text-indigo-400 text-xs leading-tight">Physics Academy</p>
+          </div>
+        </Link>
         {onCloseMobile && (
           <button onClick={onCloseMobile} className="ml-auto text-slate-400 hover:text-white lg:hidden">
             <X className="w-5 h-5" />
