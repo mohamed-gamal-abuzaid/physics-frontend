@@ -9,9 +9,11 @@ import { useUI } from '@/contexts/UIContext';
 import {
   GraduationCap, FileText, UploadCloud, CheckCircle2, Clock, Search,
   Download, Eye, Star, Award, Filter, Plus, FileCheck2, BookOpen,
-  Calendar, User, Users, ChevronRight, AlertCircle, Sparkles
+  Calendar, User, Users, ChevronRight, AlertCircle, Sparkles, FolderPlus
 } from 'lucide-react';
 import type { HomeworkAssignment, HomeworkSubmission, ResourceItem, BookingSession } from '@/lib/types';
+import { CreateAssignmentModal } from '../modals/CreateAssignmentModal';
+import { UploadResourceModal } from '../modals/UploadResourceModal';
 
 export function AcademicHubView() {
   const { currentRole } = useAuth();
@@ -32,6 +34,10 @@ export function AcademicHubView() {
   const [activeSubTab, setActiveSubTab] = useState<'assignments' | 'session_notes' | 'grading' | 'resources'>('assignments');
   const [resourceSearch, setResourceSearch] = useState('');
   const [resourceCategory, setResourceCategory] = useState('ALL');
+
+  // Admin action modals
+  const [isCreateAssignmentOpen, setIsCreateAssignmentOpen] = useState(false);
+  const [isUploadResourceOpen, setIsUploadResourceOpen] = useState(false);
 
   // Queries
   const { data: assignments = [], isLoading: loadingAssignments } = useQuery<HomeworkAssignment[]>({
@@ -148,6 +154,24 @@ export function AcademicHubView() {
       {/* SUBTAB 1: ASSIGNMENTS */}
       {activeSubTab === 'assignments' && (
         <div className="space-y-4">
+          {/* Admin Action Bar */}
+          {isAdmin && (
+            <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+              <div>
+                <h3 className="font-bold text-sm text-slate-900">Homework Worksheets Management</h3>
+                <p className="text-xs text-slate-500">Create and assign problem sets to all students or specific scholars</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreateAssignmentOpen(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create Homework Task</span>
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {assignments.map((assignment) => {
               const studentSubmission = submissions.find((sub) => sub.assignmentId === assignment.id);
@@ -330,6 +354,24 @@ export function AcademicHubView() {
       {/* SUBTAB 4: RESOURCE LIBRARY */}
       {activeSubTab === 'resources' && (
         <div className="space-y-4">
+          {/* Admin Action Bar */}
+          {isAdmin && (
+            <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+              <div>
+                <h3 className="font-bold text-sm text-slate-900">Learning Materials &amp; Resources Library</h3>
+                <p className="text-xs text-slate-500">Upload lecture notes, formula sheets, lab guides, and exam solutions</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsUploadResourceOpen(true)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer"
+              >
+                <FolderPlus className="w-4 h-4" />
+                <span>Upload Learning Material</span>
+              </button>
+            </div>
+          )}
+
           {/* Search & Filter */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -410,6 +452,17 @@ export function AcademicHubView() {
           )}
         </div>
       )}
+
+      {/* Admin Action Modals */}
+      <CreateAssignmentModal
+        isOpen={isCreateAssignmentOpen}
+        onClose={() => setIsCreateAssignmentOpen(false)}
+      />
+
+      <UploadResourceModal
+        isOpen={isUploadResourceOpen}
+        onClose={() => setIsUploadResourceOpen(false)}
+      />
     </div>
   );
 }
