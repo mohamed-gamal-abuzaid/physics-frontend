@@ -94,9 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(userData);
         setCurrentRoleState(normalizedRole);
         return { success: true };
-      } catch (err: unknown) {
+      } catch (err: any) {
         const message =
-          err instanceof Error ? err.message : 'Invalid credentials. Please try again.';
+          err?.response?.data?.message ||
+          (err instanceof Error ? err.message : 'Invalid credentials. Please try again.');
         return { success: false, error: message };
       }
     },
@@ -124,9 +125,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(userData);
         setCurrentRoleState(normalizedRole);
         return { success: true };
-      } catch (err: unknown) {
+      } catch (err: any) {
         const message =
-          err instanceof Error ? err.message : 'Registration failed. Please check your details.';
+          err?.response?.data?.message ||
+          (err instanceof Error ? err.message : 'Registration failed. Please check your details.');
         return { success: false, error: message };
       }
     },
