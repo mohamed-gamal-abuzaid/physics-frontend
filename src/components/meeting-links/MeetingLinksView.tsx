@@ -198,33 +198,40 @@ export function MeetingLinksView() {
               Connect directly with Mr. Mohammed Sayed. Please join 2 minutes prior to your scheduled lesson.
             </p>
 
-            {profile?.meetingLink ? (
-              <div className="space-y-4">
-                <div className="p-3 bg-white/10 rounded-xl border border-white/20 flex items-center justify-between text-xs font-mono">
-                  <span className="truncate max-w-[280px] text-indigo-200">{profile.meetingLink}</span>
-                  <button
-                    onClick={() => handleCopy(profile.meetingLink!, 'my-link')}
-                    className="flex items-center gap-1 px-3 py-1 bg-white text-indigo-950 font-bold rounded-lg hover:bg-indigo-50"
-                  >
-                    {copiedId === 'my-link' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copiedId === 'my-link' ? 'Copied' : 'Copy'}
-                  </button>
-                </div>
+            {(() => {
+              const effectiveMeetingLink =
+                profile?.meetingLink ||
+                (profile as any)?.studentProfile?.meetingLink ||
+                (profile as any)?.studentProfile?.meeting_link;
 
-                <a
-                  href={profile.meetingLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all"
-                >
-                  <Video className="w-4 h-4" /> Enter Live Lecture Room
-                </a>
-              </div>
-            ) : (
-              <div className="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-indigo-200">
-                Your permanent meeting room link is currently being configured by your instructor. It will appear here once assigned.
-              </div>
-            )}
+              return effectiveMeetingLink ? (
+                <div className="space-y-4">
+                  <div className="p-3 bg-white/10 rounded-xl border border-white/20 flex items-center justify-between text-xs font-mono">
+                    <span className="truncate max-w-[280px] text-indigo-200">{effectiveMeetingLink}</span>
+                    <button
+                      onClick={() => handleCopy(effectiveMeetingLink, 'my-link')}
+                      className="flex items-center gap-1 px-3 py-1 bg-white text-indigo-950 font-bold rounded-lg hover:bg-indigo-50"
+                    >
+                      {copiedId === 'my-link' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedId === 'my-link' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+
+                  <a
+                    href={effectiveMeetingLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all"
+                  >
+                    <Video className="w-4 h-4" /> Enter Live Lecture Room
+                  </a>
+                </div>
+              ) : (
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-indigo-200">
+                  Your permanent meeting room link is currently being configured by your instructor. It will appear here once assigned.
+                </div>
+              );
+            })()}
           </div>
 
           {/* Quick tips */}

@@ -33,13 +33,15 @@ export function AccountSettingsModal() {
   // Sync if profile loads
   React.useEffect(() => {
     if (profile || user) {
-      setName(profile?.name || user?.name || '');
-      setEmail(profile?.email || user?.email || '');
-      setPhone(profile?.studentPhone || profile?.phone || user?.phone || '');
-      setParentPhone(profile?.parentPhone || profile?.parentPhoneNumber || '');
-      setSchoolName(profile?.schoolName || '');
-      setYear(profile?.year || profile?.academicYear || '');
-      setBoard(profile?.board || profile?.examBoard || '');
+      const p = profile as any;
+      const sp = p?.studentProfile || {};
+      setName(p?.name || user?.name || '');
+      setEmail(p?.email || user?.email || '');
+      setPhone(p?.studentPhone || p?.phone || sp?.studentPhone || user?.phone || '');
+      setParentPhone(p?.parentPhone || p?.parentPhoneNumber || sp?.parentPhone || '');
+      setSchoolName(p?.schoolName || sp?.schoolName || '');
+      setYear(p?.year || p?.academicYear || sp?.year || sp?.academicYear || '');
+      setBoard(p?.board || p?.examBoard || sp?.board || sp?.examBoard || '');
       setFormError(null);
     }
   }, [profile, user]);

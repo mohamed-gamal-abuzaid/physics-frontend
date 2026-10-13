@@ -206,14 +206,21 @@ export function NotificationDropdown({
       </div>
 
       {/* Footer */}
-      {notifications.length > 0 && (
-        <div className="px-4 py-2 bg-slate-50/80 border-t border-slate-100 text-center">
-          <p className="text-[11px] text-slate-400 flex items-center justify-center gap-1">
-            <Sparkles className="w-3 h-3 text-indigo-500" />
-            <span>Updated in real-time</span>
-          </p>
-        </div>
-      )}
+      <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+        <button
+          onClick={() => {
+            onClose();
+            router.push('/notifications');
+          }}
+          className="font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1"
+        >
+          <span>Open Full Notification Log</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </button>
+        <span className="text-[11px] text-slate-400 flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-indigo-500" /> Real-time
+        </span>
+      </div>
     </div>
   );
 }

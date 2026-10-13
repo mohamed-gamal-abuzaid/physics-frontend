@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Users, CalendarDays, GraduationCap, CreditCard,
-  Headphones, Video, MessageSquare, Atom, LogOut, X, ChevronRight, Settings
+  Headphones, Video, MessageSquare, Atom, LogOut, X, ChevronRight, Settings, Bell
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { studentApi } from '@/lib/api/student.api';
 
 interface SidebarProps {
   mobileOpen?: boolean;
@@ -14,9 +16,17 @@ interface SidebarProps {
 }
 
 export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
-  const { user, currentRole, logout } = useAuth();
+  const { user, currentRole, logout, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['notifications', currentRole],
+    queryFn: studentApi.getNotifications,
+    enabled: isAuthenticated,
+  });
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const navItems = [
     {
@@ -67,6 +77,14 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
       icon: Video,
       href: '/meeting-links',
       roles: ['admin', 'student', 'parent'],
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: Bell,
+      href: '/notifications',
+      roles: ['admin', 'student', 'parent'],
+      badge: unreadCount,
     },
     {
       id: 'reviews',
@@ -134,7 +152,14 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
             >
               <Icon className={`w-4.5 h-4.5 shrink-0 ${isActive ? 'text-indigo-400' : ''}`} />
               <span className="truncate">{item.label}</span>
-              {isActive && <ChevronRight className="ml-auto w-3.5 h-3.5 text-indigo-400" />}
+              {typeof (item as any).badge === 'number' && (item as any).badge > 0 && (
+                <span className="ml-auto bg-rose-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none shrink-0">
+                  {(item as any).badge}
+                </span>
+              )}
+              {isActive && !(typeof (item as any).badge === 'number' && (item as any).badge > 0) && (
+                <ChevronRight className="ml-auto w-3.5 h-3.5 text-indigo-400" />
+              )}
             </Link>
           );
         })}

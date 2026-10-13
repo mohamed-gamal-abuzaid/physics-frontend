@@ -502,19 +502,17 @@ export function AdminStudentsView() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-medium text-xs">
-                  <th className="py-3.5 px-4 font-semibold">Name</th>
-                  <th className="py-3.5 px-4 font-semibold">Email</th>
-                  <th className="py-3.5 px-4 font-semibold">School Name</th>
-                  <th className="py-3.5 px-3 font-semibold">Year</th>
-                  <th className="py-3.5 px-4 font-semibold">Board</th>
-                  <th className="py-3.5 px-4 font-semibold">Student Phone</th>
-                  <th className="py-3.5 px-4 font-semibold">Parent Phone</th>
-                  <th className="py-3.5 px-3 font-semibold text-center">Sessions</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                <tr className="border-b border-slate-100 bg-slate-50/75 text-slate-500 font-medium text-[11px]">
+                  <th className="py-2.5 px-3 font-semibold">Scholar</th>
+                  <th className="py-2.5 px-2.5 font-semibold">School</th>
+                  <th className="py-2.5 px-2.5 font-semibold">Year & Board</th>
+                  <th className="py-2.5 px-2.5 font-semibold">Student Phone</th>
+                  <th className="py-2.5 px-2.5 font-semibold">Parent Phone</th>
+                  <th className="py-2.5 px-2 font-semibold text-center">Sessions</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -531,81 +529,74 @@ export function AdminStudentsView() {
                       className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                       onClick={() => handleOpenStudent(student, 'details')}
                     >
-                      {/* Name */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2.5">
+                      {/* Scholar (Name & Email) */}
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2">
                           {student.avatar ? (
                             <img
                               src={student.avatar}
                               alt={student.name}
-                              className="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0"
+                              className="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white font-bold text-[11px] flex items-center justify-center shrink-0 shadow-xs">
                               {student.name?.[0]?.toUpperCase() ?? 'S'}
                             </div>
                           )}
-                          <div className="overflow-hidden">
+                          <div className="overflow-hidden min-w-0 max-w-[170px]">
                             <p className="font-semibold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
                               {student.name}
                             </p>
-                            <p className="text-[11px] text-slate-400 truncate">
-                              ID: #{student.id}
+                            <p className="text-[10px] text-slate-500 font-mono truncate">
+                              {student.email}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      {/* Email */}
-                      <td className="py-3 px-4 text-slate-600">
-                        <span className="font-mono text-xs">{student.email}</span>
-                      </td>
-
                       {/* School Name */}
-                      <td className="py-3 px-4 text-slate-700 font-medium">
-                        <span className="truncate max-w-[150px] inline-block" title={student.schoolName || 'Not specified'}>
+                      <td className="py-2 px-2.5 text-slate-700">
+                        <span className="truncate max-w-[130px] inline-block font-medium" title={student.schoolName || 'Not specified'}>
                           {student.schoolName || <span className="text-slate-400 italic">Not set</span>}
                         </span>
                       </td>
 
-                      {/* Year */}
-                      <td className="py-3 px-3">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/60">
-                          {yearDisplay}
-                        </span>
-                      </td>
-
-                      {/* Board */}
-                      <td className="py-3 px-4">
-                        <span
-                          className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200/50 max-w-[160px] truncate"
-                          title={boardDisplay}
-                        >
-                          {boardDisplay}
-                        </span>
+                      {/* Year & Board combined */}
+                      <td className="py-2 px-2.5">
+                        <div className="flex items-center gap-1 flex-wrap max-w-[150px]">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            {yearDisplay}
+                          </span>
+                          <span
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200/50 truncate max-w-[95px]"
+                            title={boardDisplay}
+                          >
+                            {boardDisplay}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Student Phone */}
-                      <td className="py-3 px-4 text-slate-600">
-                        <span className="font-mono text-xs">{studentPhone}</span>
+                      <td className="py-2 px-2.5 text-slate-600">
+                        <span className="font-mono text-[11px]">{studentPhone}</span>
                       </td>
 
                       {/* Parent Phone */}
-                      <td className="py-3 px-4 text-slate-600">
-                        <span className="font-mono text-xs" title={student.parentName ? `Parent: ${student.parentName}` : undefined}>
+                      <td className="py-2 px-2.5 text-slate-600">
+                        <span className="font-mono text-[11px]" title={student.parentName ? `Parent: ${student.parentName}` : undefined}>
                           {parentPhone}
                         </span>
                       </td>
 
                       {/* Sessions */}
-                      <td className="py-3 px-3 text-center">
+                      <td className="py-2 px-2 text-center">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleOpenStudent(student, 'sessions');
                           }}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition ${
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold transition ${
                             sessionCount > 0
                               ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
                               : 'bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200'
@@ -618,23 +609,23 @@ export function AdminStudentsView() {
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="py-2 px-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1">
                           <button
                             type="button"
                             onClick={() => handleOpenStudent(student, 'details')}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 text-slate-600 text-xs font-semibold shadow-xs transition cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 text-slate-600 text-[11px] font-semibold shadow-xs transition cursor-pointer"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-3 h-3" />
                             <span>Details</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => setStudentToDelete({ id: student.id, name: student.name })}
-                            className="p-1.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 transition shadow-xs cursor-pointer"
+                            className="p-1 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition shadow-xs cursor-pointer"
                             title={`Delete ${student.name}'s account`}
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
                       </td>

@@ -12,7 +12,7 @@ import {
   TrendingUp, FileText, Download, ShieldCheck, User,
   Pencil, Save, X, School, Phone, Mail, AlertCircle
 } from 'lucide-react';
-import { YEAR_OPTIONS, BOARD_OPTIONS } from '@/lib/types';
+import { YEAR_OPTIONS, BOARD_OPTIONS, BookingSession, HomeworkAssignment, HomeworkSubmission } from '@/lib/types';
 
 export function StudentDashboard() {
   const { user } = useAuth();
@@ -92,14 +92,15 @@ export function StudentDashboard() {
     );
   }
 
-  const privateCredits = student?.remainingPrivateCredits ?? 0;
-  const groupCredits = student?.remainingGroupCredits ?? 0;
-  const attendanceRate = student?.attendanceRate ?? 95;
-  const averageScore = student?.averageScore ?? 88;
+  const privateCredits = student?.remainingPrivateCredits ?? (dashboard as any)?.remainingPrivateCredits ?? 0;
+  const groupCredits = student?.remainingGroupCredits ?? (dashboard as any)?.remainingGroupCredits ?? 0;
+  const attendanceRate = student?.attendanceRate ?? (dashboard as any)?.attendanceRate ?? 0;
+  const averageScore = student?.averageScore ?? (dashboard as any)?.averageScore ?? 0;
 
-  const upcomingSessions = dashboard?.upcomingSessions || [];
-  const pendingAssignments = dashboard?.pendingAssignments || [];
-  const recentSubmissions = dashboard?.recentSubmissions || [];
+  const upcomingSessions: BookingSession[] = dashboard?.upcomingSessions || (dashboard as any)?.sessions?.items || [];
+  const pendingAssignments: HomeworkAssignment[] = dashboard?.pendingAssignments || (dashboard as any)?.assignments?.items || [];
+  const recentSubmissions: HomeworkSubmission[] = dashboard?.recentSubmissions || (dashboard as any)?.submissions?.items || [];
+  const effectiveMeetingLink = student?.meetingLink || (student as any)?.studentProfile?.meetingLink || profile?.meetingLink || (profile as any)?.studentProfile?.meetingLink;
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -609,9 +610,9 @@ export function StudentDashboard() {
             <p className="text-xs text-indigo-200 mb-3">
               One-click access to all your 1-on-1 and revision masterclasses.
             </p>
-            {student?.meetingLink ? (
+            {effectiveMeetingLink ? (
               <a
-                href={student.meetingLink}
+                href={effectiveMeetingLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-2.5 rounded-lg text-xs font-bold bg-white text-indigo-950 hover:bg-indigo-50 flex items-center justify-center gap-2 transition-all shadow-sm"
