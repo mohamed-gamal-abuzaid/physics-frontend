@@ -33,6 +33,10 @@ export const studentApi = {
     const res = await apiClient.patch<any>('/api/student/profile', data);
     return res.data?.profile ?? res.data;
   },
+  requestFreeTrial: async (): Promise<{ success: boolean; message: string }> => {
+    const res = await apiClient.post<any>('/api/student/free-trial');
+    return res.data;
+  },
 
   // Assignments
   getAssignments: async (): Promise<HomeworkAssignment[]> => {

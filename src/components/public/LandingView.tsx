@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { publicApi } from '@/lib/api/public.api';
 import { studentApi } from '@/lib/api/student.api';
@@ -25,7 +26,53 @@ import type { Review } from '@/lib/types';
 // ─── Hero ────────────────────────────────────────────────────────────────────
 
 function HeroSection() {
-  const { setIsFreeTrialOpen, setIsSignInOpen } = useUI();
+  const { setIsFreeTrialOpen, setIsSignInOpen, showToast } = useUI();
+  const { isAuthenticated, user, currentRole } = useAuth();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  // Query profile if authenticated student
+  const { data: profile } = useQuery({
+    queryKey: ['student-profile'],
+    queryFn: studentApi.getProfile,
+    enabled: isAuthenticated && currentRole === 'student',
+  });
+
+  const [isRequestingTrial, setIsRequestingTrial] = useState(false);
+
+  // Check if student has taken free trial
+  const hasUsedFreeTrial = Boolean(
+    profile?.hasUsedFreeTrial ||
+    profile?.registeredVia === 'Free Trial' ||
+    (profile?.totalCredits ?? 0) > 0 ||
+    (profile?.remainingCredits ?? 0) > 0 ||
+    (profile?.remainingPrivateCredits ?? 0) > 0 ||
+    (profile?.remainingGroupCredits ?? 0) > 0
+  );
+
+  const handleFreeTrialClick = async () => {
+    if (!isAuthenticated) {
+      setIsFreeTrialOpen(true);
+      return;
+    }
+
+    if (currentRole !== 'student') {
+      router.push('/dashboard');
+      return;
+    }
+
+    try {
+      setIsRequestingTrial(true);
+      const res = await studentApi.requestFreeTrial();
+      showToast(res.message || 'Free trial request submitted successfully! Your instructor will add your session.', 'success');
+      queryClient.invalidateQueries({ queryKey: ['student-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['student-dashboard'] });
+    } catch (err: any) {
+      showToast(err?.response?.data?.message || err?.message || 'Failed to request free trial.', 'error');
+    } finally {
+      setIsRequestingTrial(false);
+    }
+  };
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-900 text-white">
@@ -52,20 +99,34 @@ function HeroSection() {
           top grades through deep conceptual clarity and exam-focused technique.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button
-            onClick={() => setIsFreeTrialOpen(true)}
-            className="flex items-center gap-2.5 px-7 py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl shadow-lg shadow-amber-900/30 transition-all hover:scale-105 cursor-pointer"
-          >
-            <Sparkles className="w-5 h-5" />
-            Book a Free Trial
-          </button>
-          <button
-            onClick={() => setIsSignInOpen(true)}
-            className="flex items-center gap-2.5 px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-2xl border border-white/20 transition-all hover:scale-105 cursor-pointer"
-          >
-            <LogIn className="w-5 h-5" />
-            Student Sign In
-          </button>
+          {!hasUsedFreeTrial && (
+            <button
+              onClick={handleFreeTrialClick}
+              disabled={isRequestingTrial}
+              className="flex items-center gap-2.5 px-7 py-3.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white font-bold rounded-2xl shadow-lg shadow-amber-900/30 transition-all hover:scale-105 cursor-pointer"
+            >
+              <Sparkles className="w-5 h-5" />
+              {isRequestingTrial ? 'Submitting Request...' : 'Book a Free Trial'}
+            </button>
+          )}
+
+          {isAuthenticated ? (
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="flex items-center gap-2.5 px-7 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-2xl shadow-lg shadow-indigo-900/40 transition-all hover:scale-105 cursor-pointer"
+            >
+              <LogIn className="w-5 h-5" />
+              Go to Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsSignInOpen(true)}
+              className="flex items-center gap-2.5 px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-2xl border border-white/20 transition-all hover:scale-105 cursor-pointer"
+            >
+              <LogIn className="w-5 h-5" />
+              Student Sign In
+            </button>
+          )}
         </div>
       </div>
     </section>

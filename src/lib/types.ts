@@ -49,6 +49,8 @@ export interface StudentProfile {
   remainingGroupCredits: number;
   totalPrivateCredits?: number;
   totalGroupCredits?: number;
+  totalCredits?: number;
+  remainingCredits?: number;
   attendanceRate?: number;
   averageScore?: number;
   status: StudentStatus;
@@ -63,6 +65,7 @@ export interface StudentProfile {
   hardestTopic?: string;
   registeredVia?: string;
   isAccountGranted?: boolean;
+  hasUsedFreeTrial?: boolean;
   sessionsCount?: number;
   sessions?: BookingSession[];
 }
