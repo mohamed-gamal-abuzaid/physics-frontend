@@ -228,7 +228,9 @@ export function AdminStudentsView() {
       queryClient.invalidateQueries({ queryKey: ['admin-crm-students'] });
       queryClient.invalidateQueries({ queryKey: ['admin-sessions'] });
       queryClient.invalidateQueries({ queryKey: ['student-sessions'] });
-      showToast('Student added to session successfully!', 'success');
+      queryClient.invalidateQueries({ queryKey: ['student-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['student-dashboard'] });
+      showToast('Student added to session and +1 credit added to balance!', 'success');
       setIsAddSessionOpen(false);
       setSelectedSessionToAdd('');
       setSessionActionError(null);
@@ -692,7 +694,7 @@ export function AdminStudentsView() {
           onClick={handleCloseModal}
         >
           <div
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden my-6 border border-slate-200"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl lg:max-w-4xl overflow-hidden my-6 border border-slate-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -730,11 +732,11 @@ export function AdminStudentsView() {
             </div>
 
             {/* Modal Tab Navigation */}
-            <div className="flex border-b border-slate-200 px-6 bg-slate-50 gap-6 text-sm font-semibold">
+            <div className="flex border-b border-slate-200 px-4 sm:px-6 bg-slate-50 gap-4 sm:gap-6 text-sm font-semibold overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setActiveModalTab('details')}
-                className={`py-3 border-b-2 transition ${
+                className={`py-3 border-b-2 transition shrink-0 ${
                   activeModalTab === 'details'
                     ? 'border-indigo-600 text-indigo-600'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -745,7 +747,7 @@ export function AdminStudentsView() {
               <button
                 type="button"
                 onClick={() => setActiveModalTab('academic')}
-                className={`py-3 border-b-2 transition flex items-center gap-1.5 ${
+                className={`py-3 border-b-2 transition flex items-center gap-1.5 shrink-0 ${
                   activeModalTab === 'academic'
                     ? 'border-indigo-600 text-indigo-600'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -757,7 +759,7 @@ export function AdminStudentsView() {
               <button
                 type="button"
                 onClick={() => setActiveModalTab('sessions')}
-                className={`py-3 border-b-2 transition flex items-center gap-1.5 ${
+                className={`py-3 border-b-2 transition flex items-center gap-1.5 shrink-0 ${
                   activeModalTab === 'sessions'
                     ? 'border-indigo-600 text-indigo-600'
                     : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -769,7 +771,7 @@ export function AdminStudentsView() {
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 max-h-[70vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 max-h-[72vh] overflow-y-auto overflow-x-hidden">
               {/* Tab 1: Comprehensive Information */}
               {activeModalTab === 'details' && (
                 <div className="space-y-6">
@@ -1096,7 +1098,7 @@ export function AdminStudentsView() {
 
                   {/* Add Student to Session Panel */}
                   {isAddSessionOpen && (
-                    <div className="p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl space-y-3">
+                    <div className="p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl space-y-3 w-full min-w-0 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <h4 className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
                           <Plus className="w-3.5 h-3.5 text-indigo-600" />
@@ -1128,19 +1130,21 @@ export function AdminStudentsView() {
                           No additional available sessions found to assign to this student.
                         </p>
                       ) : (
-                        <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center">
-                          <select
-                            value={selectedSessionToAdd}
-                            onChange={(e) => setSelectedSessionToAdd(e.target.value ? Number(e.target.value) : '')}
-                            className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          >
-                            <option value="">-- Choose an available session --</option>
-                            {availableSessions.map((s) => (
-                              <option key={s.id} value={s.id}>
-                                {s.topic || s.courseName || 'Physics Session'} — {new Date(s.date).toLocaleDateString()} {s.time ? `(${s.time})` : ''} [{s.sessionFormat || 'Private'}] {s.teacherName ? `• Tutor: ${s.teacherName}` : ''}
-                              </option>
-                            ))}
-                          </select>
+                        <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center w-full min-w-0">
+                          <div className="flex-1 min-w-0 w-full">
+                            <select
+                              value={selectedSessionToAdd}
+                              onChange={(e) => setSelectedSessionToAdd(e.target.value ? Number(e.target.value) : '')}
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 truncate"
+                            >
+                              <option value="">-- Choose an available session --</option>
+                              {availableSessions.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                  {s.topic || s.courseName || 'Physics Session'} — {new Date(s.date).toLocaleDateString()} {s.time ? `(${s.time})` : ''} [{s.sessionFormat || 'Private'}] {s.teacherName ? `• Tutor: ${s.teacherName}` : ''}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                           <button
                             type="button"
                             disabled={!selectedSessionToAdd || addStudentToSessionMutation.isPending}
@@ -1162,7 +1166,7 @@ export function AdminStudentsView() {
                             ) : (
                               <>
                                 <Plus className="w-3.5 h-3.5" />
-                                <span>Add Student</span>
+                                <span>Add to Session</span>
                               </>
                             )}
                           </button>
@@ -1185,19 +1189,19 @@ export function AdminStudentsView() {
                       </p>
                     </div>
                   ) : (
-                    <div className="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100">
+                    <div className="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100 w-full min-w-0">
                       {activeStudent.sessions.map((session) => (
                         <div
                           key={session.id}
-                          className="p-3.5 bg-white hover:bg-slate-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                          className="p-3.5 bg-white hover:bg-slate-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full min-w-0"
                         >
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-xs text-slate-900">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold text-xs text-slate-900 break-words line-clamp-1">
                                 {session.topic || session.courseName || 'Physics Session'}
                               </span>
                               <span
-                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
                                   session.status === 'COMPLETED'
                                     ? 'bg-indigo-100 text-indigo-700'
                                     : session.status === 'APPROVED' || (session.status as string) === 'SCHEDULED'
@@ -1208,30 +1212,30 @@ export function AdminStudentsView() {
                                 {session.status}
                               </span>
                             </div>
-                            <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1">
-                              <span className="flex items-center gap-1">
+                            <div className="flex items-center gap-2.5 text-[11px] text-slate-500 mt-1 flex-wrap">
+                              <span className="flex items-center gap-1 shrink-0">
                                 <Calendar className="w-3 h-3 text-slate-400" />
                                 {new Date(session.date).toLocaleDateString()}
                               </span>
                               {session.time && (
-                                <span className="flex items-center gap-1">
+                                <span className="flex items-center gap-1 shrink-0">
                                   <Clock className="w-3 h-3 text-slate-400" />
                                   {session.time}
                                 </span>
                               )}
-                              <span className="font-medium text-slate-600">
+                              <span className="font-medium text-slate-600 shrink-0">
                                 {session.sessionFormat || 'Private'}
                               </span>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2.5 self-end sm:self-center">
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                             {session.meetingLink && (
                               <a
                                 href={session.meetingLink}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition"
+                                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition shrink-0"
                               >
                                 <span>Join Link</span>
                                 <ExternalLink className="w-3 h-3" />
@@ -1245,7 +1249,7 @@ export function AdminStudentsView() {
                                   topic: session.topic || session.courseName || 'Physics Session',
                                 })
                               }
-                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition flex items-center gap-1 text-xs"
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition flex items-center gap-1 text-xs shrink-0"
                               title="Remove student from session"
                             >
                               <Trash2 className="w-3.5 h-3.5 text-rose-500" />
