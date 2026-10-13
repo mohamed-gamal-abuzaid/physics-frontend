@@ -31,6 +31,8 @@ interface AuthContextType {
   }) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   setCurrentRole: (role: UserRole) => void;
+  updateUser: (updatedUser: User) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -148,6 +150,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('mrms_current_role', role);
   }, []);
 
+  const updateUser = useCallback((updatedUser: User) => {
+    setUser(updatedUser);
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const freshUser = await authApi.getMe();
+      setUser(freshUser);
+    } catch (err) {
+      console.error('Failed to refresh user profile:', err);
+    }
+  }, []);
+
   const isAuthenticated = !!token && !!user;
 
   return (
@@ -162,6 +177,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         registerUser,
         logout,
         setCurrentRole,
+        updateUser,
+        refreshUser,
       }}
     >
       {children}

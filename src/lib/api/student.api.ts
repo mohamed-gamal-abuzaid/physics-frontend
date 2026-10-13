@@ -29,7 +29,9 @@ export const studentApi = {
     const res = await apiClient.get<any>('/api/student/profile');
     return res.data?.profile ?? res.data;
   },
-  updateProfile: async (data: Partial<StudentProfile>): Promise<StudentProfile> => {
+  updateProfile: async (
+    data: Partial<StudentProfile> & { currentPassword?: string; newPassword?: string }
+  ): Promise<StudentProfile> => {
     const res = await apiClient.patch<any>('/api/student/profile', data);
     return res.data?.profile ?? res.data;
   },

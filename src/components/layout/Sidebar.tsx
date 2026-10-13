@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Users, CalendarDays, GraduationCap, CreditCard,
-  Headphones, Video, MessageSquare, Atom, LogOut, X, ChevronRight, Settings, Bell
+  Headphones, Video, MessageSquare, Atom, LogOut, X, ChevronRight, Settings, Bell, User
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -94,6 +94,13 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
       roles: ['admin'],
     },
     {
+      id: 'profile',
+      label: 'My Profile',
+      icon: User,
+      href: '/profile',
+      roles: ['admin', 'student', 'parent'],
+    },
+    {
       id: 'settings',
       label: 'Settings',
       icon: Settings,
@@ -167,28 +174,37 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
 
       {/* User Footer */}
       <div className="border-t border-slate-800 p-3">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-lg">
+        <Link
+          href="/profile"
+          onClick={onCloseMobile}
+          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-800/80 transition-colors group cursor-pointer"
+          title="View & Edit My Profile"
+        >
           {user?.avatar ? (
             <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 group-hover:scale-105 transition-transform">
               {user?.name?.[0]?.toUpperCase() ?? 'U'}
             </div>
           )}
           <div className="flex-1 overflow-hidden">
-            <p className="text-white text-sm font-medium truncate">{user?.name ?? 'User'}</p>
+            <p className="text-white text-sm font-medium truncate group-hover:text-indigo-300 transition-colors">{user?.name ?? 'User'}</p>
             <span className="text-xs px-1.5 py-0.5 rounded bg-slate-800 text-indigo-400 capitalize">
               {currentRole}
             </span>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleLogout();
+            }}
             title="Sign out"
-            className="text-slate-500 hover:text-rose-400 transition-colors"
+            className="text-slate-500 hover:text-rose-400 transition-colors p-1"
           >
             <LogOut className="w-4 h-4" />
           </button>
-        </div>
+        </Link>
       </div>
     </div>
   );

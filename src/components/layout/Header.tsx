@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Bell, Menu, Settings, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUI } from '@/contexts/UIContext';
@@ -90,31 +91,33 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         />
       </div>
 
-      {/* Settings */}
-      <button
-        onClick={() => setIsAccountSettingsOpen(true)}
+      {/* Settings Link to Profile */}
+      <Link
+        href="/profile"
+        title="My Profile & Settings"
         className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
       >
         <Settings className="w-5 h-5" />
-      </button>
+      </Link>
 
-      {/* Avatar */}
-      <button
-        onClick={() => setIsAccountSettingsOpen(true)}
-        className="flex items-center gap-2 pl-2 rounded-lg hover:bg-slate-50 transition-colors"
+      {/* User Icon & Profile in Navbar */}
+      <Link
+        href="/profile"
+        title="My Profile"
+        className="flex items-center gap-2 pl-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer group"
       >
         {user?.avatar ? (
-          <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
+          <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover group-hover:ring-2 group-hover:ring-indigo-500 transition" />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold group-hover:scale-105 transition-transform">
             {user?.name?.[0]?.toUpperCase() ?? 'U'}
           </div>
         )}
         <div className="hidden sm:block text-left">
-          <p className="text-sm font-semibold text-slate-800 leading-tight">{user?.name}</p>
+          <p className="text-sm font-semibold text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors">{user?.name}</p>
           <p className="text-[10px] text-slate-400 capitalize leading-tight">{currentRole}</p>
         </div>
-      </button>
+      </Link>
     </header>
   );
 }

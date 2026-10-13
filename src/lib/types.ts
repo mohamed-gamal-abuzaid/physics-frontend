@@ -10,6 +10,17 @@ export interface User {
   role: UserRole;
   avatar?: string;
   createdAt?: string;
+  schoolName?: string;
+  year?: string;
+  academicYear?: string;
+  board?: string;
+  examBoard?: string;
+  studentPhone?: string;
+  studentPhoneNumber?: string;
+  parentName?: string;
+  parentPhone?: string;
+  parentPhoneNumber?: string;
+  studentProfile?: any;
 }
 
 export interface AuthResponse {

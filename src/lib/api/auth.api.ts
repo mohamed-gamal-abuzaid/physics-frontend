@@ -24,6 +24,26 @@ export const authApi = {
 
   getMe: async (): Promise<User> => {
     const res = await apiClient.get<User>('/api/auth/me');
-    return res.data;
+    return (res.data as any).user || res.data;
+  },
+
+  updateProfile: async (data: {
+    name?: string;
+    email?: string;
+    currentPassword?: string;
+    newPassword?: string;
+    phone?: string;
+    avatar?: string;
+    schoolName?: string;
+    year?: string;
+    board?: string;
+    studentPhone?: string;
+    studentPhoneNumber?: string;
+    parentName?: string;
+    parentPhone?: string;
+    parentPhoneNumber?: string;
+  }): Promise<User> => {
+    const res = await apiClient.put<any>('/api/auth/profile', data);
+    return res.data.user || res.data;
   },
 };
